@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base target="_self">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hệ thống Báo cáo - MTTQ Việt Nam TP Đồng Nai</title>
+  <style>
+    :root{
+      --red:#a51515;--red2:#7f1010;--orange:#ed5b0b;--gold:#f6c344;
+      --ink:#172033;--muted:#657085;--line:#ead7d7;--paper:#fff;
+      --soft:#fff8f7;--bg:#f6f7fb;--green:#0b9b68;--amber:#c77a05;
+      --shadow:0 18px 48px rgba(86,24,24,.14);--shadow2:0 8px 24px rgba(91,33,33,.10);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#f7f8fb,#fff 48%,#f8f5f4);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+    .shell{max-width:1240px;margin:auto;padding:16px 16px 20px}
+    
+    .hero{position:relative;overflow:hidden;border-radius:32px;padding:28px;background:
+      radial-gradient(circle at 88% 10%,rgba(255,203,74,.26),transparent 27%),
+      linear-gradient(120deg,#7f1010 0%,#b71919 52%,#ed5b0b 100%);color:#fff;box-shadow:0 26px 60px rgba(135,31,18,.24)}
+    
+    .hero-grid{display:grid;grid-template-columns:minmax(260px,1.2fr) minmax(470px,1fr);gap:22px;align-items:center}
+    
+    .eyebrow{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:rgba(69,5,5,.6);border:1px solid rgba(255,211,96,.42);color:#ffd85e;font-size:11px;font-weight:800;text-transform:uppercase}
+    h1{margin:10px 0 6px;font-size:clamp(22px,3vw,34px);line-height:1.12;text-transform:uppercase}
+    .hero-sub{font-size:13px;color:#ffe9e1;font-weight:650}
+    
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%}
+    .stat{padding:14px 10px;border-radius:20px;background:rgba(69,7,7,.78);border:1px solid rgba(255,190,120,.20);text-align:center}
+    .stat b{display:block;font-size:18px;color:#ffd758;margin-top:5px}.stat span{font-size:9px;text-transform:uppercase;color:#ffd9cc;font-weight:800}
+
+    .nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .navbtn{
+      appearance:none;border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:9px 14px;
+      background:rgba(255,255,255,0.1);color:#fff;font-weight:800;font-size:11.5px;
+      cursor:pointer;transition:.2s;
+    }
+    .navbtn:hover{background:rgba(255,255,255,0.25)}
+    .navbtn.active{background:#fff;color:#9b1717;box-shadow:0 6px 15px rgba(0,0,0,.2);border-color:#fff}
+    
+    .btn-admin-login{background:#fbbf24!important;color:#78350f!important;border-radius:12px!important;padding:9px 16px!important;font-weight:900!important;font-size:12px!important;cursor:pointer!important;border:1.5px solid #fff!important;box-shadow:0 4px 12px rgba(0,0,0,.25)!important;display:inline-flex;align-items:center;gap:6px}
+    .btn-admin-login:hover{background:#f59e0b!important;transform:translateY(-1px)}
+    
+    .auth-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 14px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .btn-pwd{background:#e0f2fe;color:#0369a1;border:0;padding:4px 8px;border-radius:8px;font-size:10px;font-weight:850;cursor:pointer}
+    .btn-logout{background:#fee2e2;color:#991b1b;border:0;padding:4px 8px;border-radius:8px;font-size:10px;font-weight:850;cursor:pointer}
+
+    main{margin-top:24px}.page{display:none}.page.active{display:block}
+    .panel{background:linear-gradient(135deg,#8b1717,#b5281d);padding:5px;border-radius:28px}
+    .panelin{background:#fffaf9;border-radius:23px;padding:19px}.grid2{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+    .card{background:#fff;border:1px solid #ead7d7;border-radius:24px;padding:22px;box-shadow:var(--shadow2)}
+    .cardtitle{display:flex;align-items:center;justify-content:space-between;padding-bottom:13px;border-bottom:1px solid #f0dede;margin-bottom:16px}
+    .cardtitle h2{margin:0;font-size:14px;text-transform:uppercase}
+    
+    .label{display:block;margin:0 0 7px;font-size:11px;font-weight:850;text-transform:uppercase;color:#3c4557}.req{color:#e02929}
+    .field{width:100%;border:1px solid #d3d9e2;background:#fff;border-radius:14px;padding:12px 14px;outline:none;transition:.2s}
+    .field:focus{border-color:#e23a3a;box-shadow:0 0 0 3px rgba(226,58,58,.1)}
+    
+    .combo{position:relative}
+    .combo-list{display:none;position:absolute;z-index:120;top:calc(100% + 6px);left:0;right:0;max-height:280px;overflow:auto;background:#fff;border:1px solid #e4d9d9;border-radius:14px;box-shadow:0 16px 35px rgba(0,0,0,.15);padding:6px}
+    .combo-list.show{display:block}
+    .opt{padding:10px 11px;border-radius:10px;font-size:12px;cursor:pointer}
+    .opt:hover{background:#fff0ef;color:#9a1616;font-weight:700}
+
+    /* MULTI-SELECT CHIP */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin: 4px 6px 4px 0;
+      border: 1px solid #bae6fd;
+    }
+    .chip-close {
+      margin-left: 6px;
+      cursor: pointer;
+      color: #0284c7;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .chip-close:hover { color: #0c4a6e; }
+
+    .checkbox-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 16px;
+      background-color: #f8fafc;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .checkbox-chip input[type="checkbox"] { display: none; }
+    .checkbox-chip:has(input:checked) {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border-color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .form-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    .form-grid-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.4;
+    }
+    
+    .periods{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .period{border:1px solid #d7dee8;border-radius:14px;padding:12px 6px;background:#f8fafc;text-align:center;font-weight:800;cursor:pointer;font-size:12px}
+    .period.active{border-color:#ed3434;background:#fff1f0;color:#b31818}
+    .detail{margin-top:12px;background:#fff8f7;border:1px solid #f1d9d7;border-radius:14px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .detail.single{grid-template-columns:1fr}
+    .upload{border:1.5px dashed #efb8b5;border-radius:16px;padding:16px;background:#fff}
+    .primary{width:100%;border:0;border-radius:14px;background:#b81515;color:#fff;padding:14px;font-weight:850;cursor:pointer;transition:.2s}
+    .primary:disabled{opacity:.6;cursor:wait}
+
+    .progressgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+    .pstat{background:#fff;border:1px solid #eadede;border-radius:16px;padding:14px}.pstat span{font-size:10px;color:#768195;font-weight:750}.pstat b{display:block;font-size:24px;margin-top:6px}
+    .tablewrap{overflow:auto;border:1px solid #eadede;border-radius:15px}table{width:100%;border-collapse:collapse;min-width:800px}th,td{padding:11px 12px;text-align:left;border-bottom:1px solid #edf0f3;font-size:11px}th{background:#faf6f6;color:#7e3131;text-transform:uppercase;font-size:10px}
+    
+    .filter-box{background:#fdf2f2;border:1px solid #fecaca;border-radius:16px;padding:16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+    .filter-item{display:flex;flex-direction:column;gap:4px}
+    .filter-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+
+    .btn-sync{background:#0b9b68;color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+    .btn-sync:hover{background:#087a52}
+    .btn-export-ai{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(124,58,237,.25)}
+    .btn-export-ai:hover{background:#6d28d9}
+    .btn-export{background:#3b82f6;color:#fff;border:0;border-radius:12px;padding:12px 14px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+
+    .action-btn-group{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+    .btn-sm-pwd{border:1px solid #38bdf8;background:#f0f9ff;color:#0369a1;border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:800;cursor:pointer}
+    .btn-sm-del{border:1px solid #f87171;background:#fee2e2;color:#991b1b;border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:800;cursor:pointer}
+    .btn-sm-toggle{border:1px solid #cbd5e1;background:#fff;border-radius:6px;padding:3px 7px;font-size:10.5px;cursor:pointer}
+
+    .ai-modal-card{background:#fff;border-radius:24px;padding:26px;width:92%;max-width:880px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.3)}
+    .ai-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-top:14px}
+    .ai-box h4{margin:0 0 8px;font-size:12.5px;text-transform:uppercase;color:#7a1414}
+    .ai-rendered-content{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;font-size:13px;line-height:1.7;color:#1e293b;white-space:pre-wrap;font-family:Segoe UI,Arial,sans-serif}
+
+    .app-footer{margin-top:28px;padding:16px;text-align:center;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
+    .app-footer b{color:#7a1414}
+    .visit-badge{display:inline-flex; flex-direction:column; gap:4px; margin-top:10px; padding:8px 16px; border-radius:14px; font-weight:600; color:#5c687d; background:rgba(0,0,0,0.03); text-align:center;}
+
+    .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:999;display:none;place-items:center}
+    .modal.show{display:grid}
+    .modalcard{background:#fff;border-radius:22px;padding:26px;width:90%;max-width:380px;box-shadow:0 20px 40px rgba(0,0,0,.25)}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:1000;background:#162033;color:#fff;padding:12px 16px;border-radius:12px;font-size:11px;font-weight:700;display:none}
+    .toast.show{display:block}.toast.error{background:#981d1d}
+
+    @media(max-width:800px){
+      .hero-grid{grid-template-columns:1fr; gap:16px}
+      .grid2{grid-template-columns:1fr}
+      .progressgrid{grid-template-columns:repeat(2,1fr)}
+      .periods{grid-template-columns:repeat(2,1fr)}
+      .filter-box{flex-direction:column;align-items:flex-start}
+      .hero-header-content { flex-direction:column; text-align:center; }
+      .hero-right-col { align-items:center !important; }
+      .nav-container { justify-content:center !important; }
+      .form-grid-2col { grid-template-columns: 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  
+  <header class="hero">
+    <div class="hero-grid">
+      
+      <div class="hero-header-content" style="display:flex; align-items:center; gap:16px;">
+        <div style="width:80px; height:80px; border-radius:50%; background:#fff; border:2px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; padding:3px; flex-shrink:0;">
+          <img 
+            src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Mat-Tran-To-Quoc-Viet-Nam.png" 
+            alt="Logo MTTQ" 
+            style="width:100%; height:100%; object-fit:contain; transform:scale(1.08);"
+          >
+        </div>
+        <div>
+          <div class="eyebrow">● Hệ thống chuyển đổi số</div>
+          <h1>Ủy ban MTTQ Việt Nam<br>Thành Phố Đồng Nai</h1>
+          <div class="hero-sub">Cổng tiếp nhận và theo dõi tiến độ báo cáo trực tuyến</div>
+        </div>
+      </div>
+
+      <div class="hero-right-col" style="display:flex; flex-direction:column; align-items:flex-end; gap:16px;">
+        
+        <div class="nav-container" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <nav class="nav">
+            <button type="button" class="navbtn active" data-page="report">✈ Báo cáo</button>
+            <button type="button" class="navbtn" id="navProgressBtn" data-page="progress" style="display:none">▥ Tiến độ</button>
+            <button type="button" class="navbtn" id="navSummaryBtn" data-page="summary" style="display:none">📊 Thống kê</button>
+            <button type="button" class="navbtn" id="navUnitsBtn" data-page="units" style="display:none">🏫 Đơn vị</button>
+            <button type="button" class="navbtn" id="navUsersBtn" data-page="users" style="display:none">👥 Quản trị</button>
+          </nav>
+          <div id="authSection">
+            <button type="button" class="btn-admin-login" id="showLoginModal">🔒 Đăng nhập Quản Trị</button>
+          </div>
+        </div>
+
+        <div class="stats" style="width:100%;">
+          <div class="stat"><span>Tổng đơn vị</span><b id="headTotal">106</b></div>
+          <div class="stat"><span>Đã gửi</span><b id="headSubmitted">0</b></div>
+          <div class="stat"><span>Tiến độ</span><b id="headRate" style="color:#66edb6">0%</b></div>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <main>
+    <!-- GIAO DIỆN 1: NỘP BÁO CÁO -->
+    <section class="page active" id="page-report">
+      <div class="panel"><div class="panelin">
+        <div class="grid2">
+          <div class="card">
+            <div class="cardtitle"><h2>Gửi báo cáo trực tuyến</h2></div>
+            <form id="reportForm">
+              
+              <label class="label">1. Đơn vị gửi báo cáo (Có thể chọn nhiều đơn vị) <span class="req">*</span></label>
+              <div class="combo" id="combo">
+                <input id="unitSearch" class="field" type="text" autocomplete="off" placeholder="Nhấn để chọn hoặc gõ tìm các xã, phường...">
+                <input id="unitValue" type="hidden">
+                <div id="unitList" class="combo-list"></div>
+              </div>
+              <div id="selectedUnitsContainer" style="margin-top:8px;"></div>
+              <div style="margin-top:6px;font-size:10px;color:#0b9b68;font-weight:bold;" id="unitCountLabel">Đang kết nối danh mục...</div>
+
+              <div style="height:15px"></div>
+              <label class="label">2. Loại kỳ báo cáo <span class="req">*</span></label>
+              <div class="periods">
+                <button type="button" class="period active" data-type="Tháng">Tháng</button>
+                <button type="button" class="period" data-type="Quý">Quý</button>
+                <button type="button" class="period" data-type="Năm">Năm</button>
+                <button type="button" class="period" data-type="Đột xuất">⚡ Đột xuất</button>
+              </div>
+              <div class="detail" id="periodDetail"></div>
+
+              <!-- GIAO DIỆN FORM 2 CỘT -->
+              <div id="dynamicFormArea" style="display:none; margin-top:15px; border: 1px solid #bae6fd; padding:15px; border-radius:12px; background:#f0f9ff;">
+                 <label class="label" style="color:#0369a1; font-size:13px;">📝 ĐIỀN THÔNG TIN BÁO CÁO NHANH</label>
+                 <div id="dynamicFormContainer" style="margin-top:10px;"></div>
+              </div>
+
+              <div style="height:15px"></div>
+              <label class="label">3. Nội dung báo cáo / Trả lời nhanh (Tùy chọn)</label>
+              <div id="adhocHint" style="display:none; background:#f0f9ff; border:1px solid #bae6fd; color:#0369a1; padding:10px 14px; border-radius:12px; font-size:12px; margin-bottom:8px; line-height:1.6;"></div>
+              <textarea id="textContent" class="field" rows="4" placeholder="Nhập nội dung báo cáo trực tiếp vào đây (Nếu không có file đính kèm)..."></textarea>
+
+              <div style="height:15px"></div>
+              <label class="label">4. Đính kèm file báo cáo (Không bắt buộc nếu đã điền Form)</label>
+              <div class="upload">
+                <input id="fileInput" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.jpg,.png">
+                <div style="font-size:11px;color:#657085;margin-top:6px" id="fileMeta">Tối đa 25MB</div>
+              </div>
+
+              <div style="height:15px"></div>
+              <button class="primary" id="submitBtn" type="submit">✈ Gửi Báo Cáo</button>
+            </form>
+          </div>
+
+          <aside>
+            <div class="card">
+              <div class="cardtitle"><h2>Hướng dẫn</h2></div>
+              <p style="font-size:12px;color:#555;line-height:1.6">
+                1. Nhấp chọn một hoặc nhiều <b>đơn vị xã/phường</b> cần nộp.<br>
+                2. Chọn <b>Tháng, Quý, Năm hoặc Đột xuất</b>.<br>
+                3. Trả lời nội dung báo cáo trực tiếp hoặc đính kèm File.<br>
+                4. Nhấn <b>Gửi Báo Cáo</b>.<br><br>
+                <span style="color:#b81515;font-weight:700">Lưu ý:</span> Hệ thống sẽ tự động cập nhật tiến độ cho toàn bộ các đơn vị bạn vừa chọn chỉ trong 1 lần gửi.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- GIAO DIỆN 2: TIẾN ĐỘ -->
+    <section class="page" id="page-progress">
+      <div class="panel"><div class="panelin">
+        <div class="card">
+          <div class="cardtitle">
+            <div>
+              <h2>Tình hình nộp báo cáo</h2>
+              <div id="adminRoleText" style="font-size:11px;color:#768195;margin-top:3px">Quản lý chuyên sâu dành cho Quản trị viên</div>
+            </div>
+            <button id="refreshProgress" class="navbtn" style="background:#f4f4f5;color:#333;font-size:11px;border:1px solid #ddd" type="button">↻ Làm mới</button>
+          </div>
+
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:800;color:#3c4557;text-transform:uppercase">Lọc nhanh:</span>
+              <select id="progFilterType" class="field" style="max-width:130px;padding:8px 12px">
+                <option value="ALL">Tất cả</option>
+                <option value="Tháng">Theo Tháng</option>
+                <option value="Quý">Theo Quý</option>
+                <option value="Năm">Theo Năm</option>
+                <option value="Đột xuất">Đột xuất</option>
+              </select>
+              
+              <div id="progPeriodValueBox" style="display:flex; align-items:center; gap:6px;"></div>
+
+              <span style="font-size:12px;font-weight:800;color:#3c4557;text-transform:uppercase;margin-left:8px">Trạng thái:</span>
+              <select id="progStatusFilter" class="field" style="max-width:130px;padding:8px 12px">
+                <option value="ALL">Tất cả</option>
+                <option value="SUBMITTED">Đã nộp</option>
+                <option value="PENDING">Chưa nộp</option>
+              </select>
+
+              <button type="button" class="btn-sync" id="btnRunProg" style="padding:8px 14px;">🔄 Lọc ngay</button>
+            </div>
+            
+            <div id="progAdminActions" style="display:none; gap:8px; align-items:center;">
+              <button type="button" class="btn-sync" id="btnProgOpenDrive" style="background:#f59e0b; color:#78350f; border: 1.5px solid #fbbf24; padding:8px 12px; font-size:11.5px; font-weight:850;">📁 Mở Drive</button>
+              <button type="button" class="btn-export" id="btnProgDownloadZip" style="background:#ea580c; padding:8px 12px; font-size:11.5px; font-weight:850;">📦 Tải File (.ZIP)</button>
+            </div>
+          </div>
+
+          <div class="progressgrid">
+            <div class="pstat"><span>Kỳ báo cáo</span><b id="pCurPeriod" style="font-size:15px;color:#7a1414">-</b></div>
+            <div class="pstat"><span>Đã nộp</span><b id="pSubmitted" style="color:#07855b">0 / 106</b></div>
+            <div class="pstat"><span>Chưa nộp</span><b id="pPending" style="color:#c77a05">106</b></div>
+            <div class="pstat"><span>Tỷ lệ hoàn thành</span><b id="pRate" style="color:#a51616">0%</b></div>
+          </div>
+
+          <div class="tablewrap">
+            <table>
+              <thead id="tableHeadProg">
+                <tr><th>STT</th><th>Đơn vị</th><th>Loại kỳ</th><th>Kỳ báo cáo</th><th>Thời gian nộp</th><th>Trạng thái</th></tr>
+              </thead>
+              <tbody id="progressBody">
+                <tr><td colspan="6" style="text-align:center">Đang tải dữ liệu...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- GIAO DIỆN 3: THỐNG KÊ TỔNG HỢP -->
+    <section class="page" id="page-summary">
+      <div class="panel"><div class="panelin">
+        <div class="card">
+          <div class="cardtitle">
+            <div>
+              <h2>Thống Kê & Báo Cáo Tổng Hợp Chi Tiết</h2>
+              <div style="font-size:11px;color:#768195;margin-top:3px">Quản lý chuyên sâu danh sách báo cáo toàn thành phố</div>
+            </div>
+          </div>
+
+          <div class="filter-box">
+            <div class="filter-item">
+              <label class="label">1. Loại kỳ</label>
+              <select id="sumPeriodType" class="field" style="min-width:130px">
+                <option value="Tháng">Theo Tháng</option>
+                <option value="Quý">Theo Quý</option>
+                <option value="Năm">Theo Năm</option>
+                <option value="Đột xuất">⚡ Đột xuất từng đợt</option>
+              </select>
+            </div>
+
+            <div class="filter-item" id="sumPeriodValueBox"></div>
+
+            <div class="filter-item">
+              <label class="label">3. Trạng thái lọc</label>
+              <select id="sumStatusFilter" class="field" style="min-width:130px">
+                <option value="ALL">Tất cả</option>
+                <option value="SUBMITTED">Đã nộp</option>
+                <option value="PENDING">Chưa nộp</option>
+              </select>
+            </div>
+
+            <div class="filter-actions">
+              <button type="button" class="btn-sync" id="btnRunAggregate">🔄 Cập nhật số liệu</button>
+              <button type="button" class="btn-export-ai" id="btnOpenAIReportModal">✨ Tự động Tổng hợp Dữ liệu</button>
+              <button type="button" class="btn-export" id="btnExportCSV">📥 Tải Excel (CSV)</button>
+              <button type="button" class="btn-export" id="btnSumDownloadZip" style="background:#ea580c; display:none;">📦 Tải Toàn Bộ File (.ZIP)</button>
+              <a href="#" target="_blank" class="btn-sync" id="btnSumOpenDrive" style="display:none; background:#f59e0b; color:#78350f; text-decoration:none; border: 1.5px solid #fbbf24;">📁 Mở Thư Mục Drive</a>
+            </div>
+          </div>
+
+          <div class="progressgrid">
+            <div class="pstat"><span>Kỳ tổng hợp</span><b id="sumCurPeriod" style="font-size:15px;color:#7a1414">-</b></div>
+            <div class="pstat"><span>Đã nộp đầy đủ</span><b id="sumSubmitted" style="color:#07855b">0 / 106</b></div>
+            <div class="pstat"><span>Chưa nộp (Cần đôn đốc)</span><b id="sumPending" style="color:#c77a05">106</b></div>
+            <div class="pstat"><span>Tỷ lệ hoàn thành</span><b id="sumRate" style="color:#a51616">0%</b></div>
+          </div>
+
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:45px">STT</th>
+                  <th>Tên Đơn Vị (Xã / Phường)</th>
+                  <th>Loại Đơn Vị</th>
+                  <th>Kỳ Báo Cáo</th>
+                  <th>Thời Gian Nộp</th>
+                  <th>File Báo Cáo / Nội Dung</th>
+                  <th>Trạng Thái</th>
+                  <th id="thAction" style="display:none;text-align:center">Tác Vụ Admin</th>
+                </tr>
+              </thead>
+              <tbody id="summaryTableBody">
+                <tr><td colspan="8" style="text-align:center">Vui lòng bấm nút "🔄 Cập nhật số liệu" để xem danh sách.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- GIAO DIỆN 4: ĐƠN VỊ MỚI -->
+    <section class="page" id="page-units">
+      <div class="panel"><div class="panelin">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="cardtitle">
+            <h2>Quản Lý Danh Mục Đơn Vị</h2>
+            <div style="font-size:11px;color:#768195;margin-top:3px">Thêm, sửa, xóa, khóa danh sách các đơn vị được phép nộp báo cáo</div>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap">
+             <button type="button" class="btn-sync" onclick="openAddUnitModal()" style="background:#0b9b68;">+ Thêm Đơn Vị Mới</button>
+             <button type="button" class="btn-export" onclick="loadUnitsAdmin()" style="background:#475569;">↻ Tải Lại Danh Sách</button>
+          </div>
+          <div class="tablewrap" style="max-height:500px; overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:45px; position:sticky; top:0; background:#faf6f6;">STT</th>
+                  <th style="position:sticky; top:0; background:#faf6f6;">Mã Nhóm</th>
+                  <th style="position:sticky; top:0; background:#faf6f6;">Tên Đơn Vị</th>
+                  <th style="position:sticky; top:0; background:#faf6f6;">Loại</th>
+                  <th style="position:sticky; top:0; background:#faf6f6;">Trạng Thái</th>
+                  <th style="position:sticky; top:0; background:#faf6f6;">Tác Vụ Admin</th>
+                </tr>
+              </thead>
+              <tbody id="unitAdminTableBody">
+                <tr><td colspan="6" style="text-align:center">Đang tải dữ liệu đơn vị...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- GIAO DIỆN 5: QUẢN LÝ QUẢN TRỊ -->
+    <section class="page" id="page-users">
+      <div class="panel"><div class="panelin">
+        
+        <!-- BẢNG QUẢN LÝ ĐỢT ĐỘT XUẤT (FORM TÙY CHỈNH) -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="cardtitle">
+            <h2>Quản Lý Các Kỳ Báo Cáo Đột Xuất (Kèm Tạo Form)</h2>
+            <div style="font-size:11px;color:#768195;margin-top:3px">Admin tạo Form câu hỏi và khoanh vùng đơn vị phải nộp</div>
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <button type="button" class="primary" id="btnAddAdhoc" style="width:auto; padding:8px 20px; border-radius:12px; background:#ea580c" onclick="openAddAdhocModal()">+ Mở Đợt Mới (Tạo Form)</button>
+          </div>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th style="width:45px">STT</th><th>Tên Kỳ Đột Xuất</th><th>Trạng thái (Khóa thì không nộp thêm được)</th><th>Tác Vụ Admin</th></tr></thead>
+              <tbody id="adhocTableBody">
+                <tr><td colspan="4" style="text-align:center">Đang tải...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminOnlySection" style="display:none;">
+          <div class="card">
+            <div class="cardtitle">
+              <h2>Tạo Mới Tài Khoản Quản Trị</h2>
+            </div>
+            <form id="createAccountForm" style="display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end;margin-bottom:20px">
+              <div>
+                <label class="label">Tên đăng nhập</label>
+                <input id="newUsername" class="field" required placeholder="vd: ban_tuyengiao">
+              </div>
+              <div>
+                <label class="label">Mật khẩu</label>
+                <input id="newPassword" class="field" type="password" required placeholder="Mật khẩu...">
+              </div>
+              <div>
+                <label class="label">Họ và Tên</label>
+                <input id="newFullName" class="field" required placeholder="Họ tên cán bộ...">
+              </div>
+              <div>
+                <label class="label">Vai trò</label>
+                <select id="newRole" class="field">
+                  <option value="VIEWER">VIEWER (Chỉ xem số liệu)</option>
+                  <option value="ADMIN">ADMIN (Quản lý báo cáo & xóa)</option>
+                  <option value="SUPER_ADMIN">SUPER ADMIN (Toàn quyền)</option>
+                </select>
+              </div>
+              <button type="submit" class="primary" style="margin:0;padding:12px 18px;height:42px">+ Tạo Tài Khoản</button>
+            </form>
+
+            <div class="cardtitle">
+              <h2>Danh Sách Tài Khoản Đã Cấp (Toàn Quyền Quản Trị)</h2>
+            </div>
+            <div class="tablewrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tên Đăng Nhập</th>
+                    <th>Họ Tên</th>
+                    <th>Vai Trò</th>
+                    <th>Trạng Thái</th>
+                    <th>Ngày Cấp</th>
+                    <th>Tác Vụ Quản Trị</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody">
+                  <tr><td colspan="6" style="text-align:center">Đang tải danh sách tài khoản...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    © Bản quyền thuộc <b>Lê Văn Nguyên</b> - Ủy ban MTTQ Việt Nam thành phố Đồng Nai.<br>
+    <div class="visit-badge">
+      <span style="display:block; margin-bottom:4px;">📅 Truy cập hôm nay: <b id="visitDaily" style="color:#0b9b68">...</b> lượt</span>
+      <span style="display:block; padding-top:4px; border-top:1px solid #ddd;">📊 Tổng truy cập hệ thống: <b id="visitTotal" style="color:#a51515">...</b> lượt</span>
+    </div>
+  </footer>
+</div>
+
+<!-- MODALS -->
+
+<!-- Modal Xem Nội dung Text -->
+<div class="modal" id="viewTextModal">
+  <div class="modalcard" style="max-width:600px; padding:20px;">
+    <h3 style="margin:0 0 14px;text-transform:uppercase;font-size:15px;color:#7a1414;border-bottom:1px solid #ddd;padding-bottom:10px;">Nội dung chi tiết</h3>
+    <div id="viewTextContent" style="background:#f8fafc; padding:15px; border-radius:12px; font-size:14px; line-height:1.6; max-height:450px; overflow-y:auto; white-space:pre-wrap; border:1px solid #e2e8f0; color:#1e293b;"></div>
+    <button type="button" class="primary" style="margin-top:15px; width:100%" onclick="document.getElementById('viewTextModal').classList.remove('show')">Đóng cửa sổ</button>
+  </div>
+</div>
+
+<!-- Modal TẠO FORM ĐỘT XUẤT CỦA ADMIN -->
+<div class="modal" id="adhocModal">
+  <div class="modalcard" style="max-width:650px; max-height:90vh; overflow-y:auto;">
+    <h3 style="margin:0 0 14px;text-transform:uppercase;font-size:15px;color:#7a1414;text-align:center" id="adhocModalTitle">Cài Đặt Đợt Báo Cáo Mới</h3>
+    <form id="adhocForm">
+      <input type="hidden" id="adhocOldName">
+      
+      <label class="label">1. Tên đợt báo cáo (VD: Bão Yagi)</label>
+      <input id="uAdhocName" class="field" required placeholder="Nhập tên đợt..." style="margin-bottom:15px">
+      
+      <!-- Lọc đơn vị -->
+      <label class="label">2. Chỉ định Đơn vị phải nộp (Danh sách hiển thị ở trang Thống kê)</label>
+      <div style="margin-bottom:8px">
+          <button type="button" class="btn-sm-pwd" onclick="checkAllAdhocUnits(true)">☑ Chọn tất cả</button>
+          <button type="button" class="btn-sm-del" onclick="checkAllAdhocUnits(false)">☐ Bỏ chọn tất cả</button>
+      </div>
+      <div id="adminAdhocUnitCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #d3d9e2; padding: 10px; border-radius: 8px; background: #fff; display: flex; flex-direction: column; gap: 6px; margin-bottom:15px;"></div>
+
+      <label class="label">3. Tạo Form Câu hỏi (Tùy chọn)</label>
+      <div style="font-size:10.5px; color:#64748b; margin-bottom:10px;">Thêm các câu hỏi để yêu cầu đơn vị gõ chữ/số trực tiếp (Thay vì nộp file). Nếu không điền câu hỏi nào, hệ thống sẽ mở ô Nhập text tự do.</div>
+      
+      <div id="adminQuestionList" style="margin-bottom:10px;"></div>
+      <button type="button" class="btn-sync" onclick="addAdminQuestion()" style="margin-bottom:20px; font-size:11px; padding:6px 12px; background:#0284c7">+ Thêm câu hỏi</button>
+      
+      <div style="display:flex;gap:10px; border-top:1px solid #ddd; padding-top:15px;">
+        <button type="button" class="field" style="background:#f1f5f9;cursor:pointer;flex:1" onclick="document.getElementById('adhocModal').classList.remove('show')">Hủy</button>
+        <button type="submit" class="primary" style="flex:1" id="btnSaveAdhoc">Lưu Cài Đặt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="unitModal">
+  <div class="modalcard" style="max-width:450px;">
+    <h3 style="margin:0 0 14px;text-transform:uppercase;font-size:15px;color:#7a1414;text-align:center" id="unitModalTitle">Thêm Đơn Vị Mới</h3>
+    <form id="unitForm">
+      <input type="hidden" id="unitRowId">
+      
+      <label class="label">Tên Đơn Vị (VD: Ủy ban MTTQ Việt Nam Xã ABC)</label>
+      <input id="uUnitName" class="field" required placeholder="Nhập tên đơn vị..." style="margin-bottom:10px">
+      
+      <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <div style="flex:1;">
+          <label class="label">Loại (Xã/Phường)</label>
+          <input id="uUnitType" class="field" required placeholder="VD: Xã">
+        </div>
+        <div style="flex:1;">
+          <label class="label">Mã Nhóm</label>
+          <input id="uGroupCode" class="field" required placeholder="VD: KHOI_C_XA">
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <div style="flex:1;">
+          <label class="label">Tên Nhóm</label>
+          <input id="uGroupName" class="field" required placeholder="VD: MTTQ cấp xã" value="MTTQ cấp xã">
+        </div>
+        <div style="flex:1;">
+          <label class="label">Cho phép nộp</label>
+          <select id="uActive" class="field">
+             <option value="Có">Có (Hoạt động)</option>
+             <option value="Không">Không (Khóa)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:10px">
+        <button type="button" class="field" style="background:#f1f5f9;cursor:pointer;flex:1" onclick="document.getElementById('unitModal').classList.remove('show')">Hủy</button>
+        <button type="submit" class="primary" style="flex:1">Lưu Lại</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="successModal">
+  <div class="modalcard" style="text-align:center; padding:45px 30px; max-width:400px; border-radius:24px;">
+    <div style="font-size:65px; color:#0b9b68; margin-bottom:15px; line-height:1;">✔</div>
+    <h3 style="margin:0 0 12px; color:#0b9b68; text-transform:uppercase; font-size:18px;">Thành Công!</h3>
+    <p id="successMessageText" style="font-size:13px; color:#555; margin-bottom:28px; line-height:1.6;">Hệ thống đã ghi nhận báo cáo của bạn an toàn.</p>
+    <button type="button" class="primary" style="width:100%; font-size:14px; padding:12px;" onclick="document.getElementById('successModal').classList.remove('show')">Đóng Cửa Sổ</button>
+  </div>
+</div>
+
+<div class="modal" id="loginModal">
+  <div class="modalcard">
+    <h3 style="margin:0 0 14px;text-transform:uppercase;font-size:15px;color:#7a1414;text-align:center">Đăng nhập Quản Trị</h3>
+    <form id="adminForm">
+      <label class="label">Tài khoản</label>
+      <input id="adminUser" class="field" type="text" value="admin" required style="margin-bottom:10px">
+      <label class="label">Mật khẩu</label>
+      <input id="adminPass" class="field" type="password" placeholder="Nhập mật khẩu..." required style="margin-bottom:15px">
+      <div style="display:flex;gap:10px">
+        <button type="button" id="closeAdminModal" class="field" style="background:#f1f5f9;cursor:pointer;flex:1">Hủy</button>
+        <button type="submit" class="primary" style="flex:1">Đăng nhập</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="pwdModal">
+  <div class="modalcard">
+    <h3 style="margin:0 0 14px;text-transform:uppercase;font-size:15px;color:#7a1414;text-align:center">Đổi Mật Khẩu Cá Nhân</h3>
+    <form id="changePwdForm">
+      <label class="label">Mật khẩu hiện tại</label>
+      <input id="oldPwd" class="field" type="password" required placeholder="Nhập mật khẩu cũ..." style="margin-bottom:10px">
+      <label class="label">Mật khẩu mới</label>
+      <input id="newPwd" class="field" type="password" required minlength="6" placeholder="Ít nhất 6 ký tự..." style="margin-bottom:10px">
+      <label class="label">Xác nhận mật khẩu mới</label>
+      <input id="confirmPwd" class="field" type="password" required placeholder="Nhập lại mật khẩu mới..." style="margin-bottom:15px">
+      <div style="display:flex;gap:10px">
+        <button type="button" id="closePwdModal" class="field" style="background:#f1f5f9;cursor:pointer;flex:1">Hủy</button>
+        <button type="submit" class="primary" style="flex:1">Lưu Mật Khẩu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="resetUserModal">
+  <div class="modalcard">
+    <h3 style="margin:0 0 10px;text-transform:uppercase;font-size:14px;color:#7a1414;text-align:center">Đổi Mật Khẩu Cho Tài Khoản</h3>
+    <p style="font-size:12px;color:#555;text-align:center;margin:0 0 12px" id="resetUserTargetText"></p>
+    <form id="resetUserForm">
+      <input type="hidden" id="resetTargetUsername">
+      <label class="label">Mật khẩu mới</label>
+      <input id="resetNewPwd" class="field" type="password" required minlength="6" placeholder="Nhập mật khẩu mới..." style="margin-bottom:15px">
+      <div style="display:flex;gap:10px">
+        <button type="button" id="closeResetUserModal" class="field" style="background:#f1f5f9;cursor:pointer;flex:1">Hủy</button>
+        <button type="submit" class="primary" style="flex:1">Cập Nhật</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- NÂNG CẤP TÍNH NĂNG AI VÀ XUẤT BẢNG SỐ LIỆU TỰ ĐỘNG -->
+<div class="modal" id="aiModal">
+  <div class="ai-modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:12px">
+      <h3 style="margin:0;text-transform:uppercase;font-size:15px;color:#7a1414" id="aiModalTitle">Báo Cáo Phân Tích Chuyên Sâu</h3>
+      <button type="button" id="closeAiModal" style="border:0;background:#fee2e2;color:#991b1b;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer">Đóng ✕</button>
+    </div>
+
+    <!-- Nút hành động sẽ được ẩn/hiện tùy thuộc vào loại dữ liệu (Bảng hay Text) -->
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button type="button" class="btn-export-ai" id="btnRunGeminiRedirect">✨ TẠO DỮ LIỆU & MỞ TRANG GEMINI TỔNG HỢP</button>
+      <button type="button" class="btn-sync" id="btnCopyAIPrompt">📋 Chỉ Copy Dữ Liệu</button>
+    </div>
+
+    <div class="ai-box">
+      <h4>📌 Tình Hình Nộp Báo Cáo</h4>
+      <div id="aiSummaryStats" style="font-size:12.5px;line-height:1.6;color:#334155"></div>
+    </div>
+
+    <div class="ai-box">
+      <h4 id="aiGuideText">🤖 HƯỚNG DẪN TỔNG HỢP AI MIỄN PHÍ 100% (KHÔNG CẦN API KEY)</h4>
+      <textarea id="aiReportOutputArea" class="field" rows="8" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:15px;font-size:12px;line-height:1.6;color:#1e293b;margin-top:10px;" readonly placeholder="Dữ liệu tổng hợp thô sẽ hiện ở đây để bạn copy..."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var currentUser = null;
+  var globalReports = [];
+  var globalAdhocPeriods = []; 
+  var allUnitsAdmin = [];
+  var periodType = "Tháng";
+  var selectedFileData = "", selectedFileInfo = null;
+  var currentSummaryDetails = [];
+  var currentProgDetails = [];
+  
+  var selectedUnitsArray = []; 
+  var currentAllowedUnits = []; 
+  var adminAdhocSelectedUnitsArray = []; 
+  var currentRawCorpus = ""; 
+
+  var FALLBACK_UNITS = [
+    "Ủy ban MTTQ Việt Nam Phường An Lộc", "Ủy ban MTTQ Việt Nam Xã An Phước", "Ủy ban MTTQ Việt Nam Xã An Viễn",
+    "Ủy ban MTTQ Việt Nam Phường Bảo Vinh", "Ủy ban MTTQ Việt Nam Xã Bàu Hàm", "Ủy ban MTTQ Việt Nam Phường Biên Hoà",
+    "Ủy ban MTTQ Việt Nam Xã Bình An", "Ủy ban MTTQ Việt Nam Phường Bình Lộc", "Ủy ban MTTQ Việt Nam Phường Bình Long",
+    "Ủy ban MTTQ Việt Nam Xã Bình Minh", "Ủy ban MTTQ Việt Nam Phường Bình Phước", "Ủy ban MTTQ Việt Nam Xã Bình Tân",
+    "Ủy ban MTTQ Việt Nam Xã Bom Bo", "Ủy ban MTTQ Việt Nam Xã Bù Đăng", "Ủy ban MTTQ Việt Nam Xã Cẩm Mỹ",
+    "Ủy ban MTTQ Việt Nam Xã Nam Cát Tiên", "Ủy ban MTTQ Việt Nam Phường Chơn Thành", "Ủy ban MTTQ Việt Nam Xã Đa Kia",
+    "Ủy ban MTTQ Việt Nam Xã Đại Phước", "Ủy ban MTTQ Việt Nam Xã Đak Lua", "Ủy ban MTTQ Việt Nam Xã Đak Nhau",
+    "Ủy ban MTTQ Việt Nam Xã Đăk Ơ", "Ủy ban MTTQ Việt Nam Phường Dầu Giây", "Ủy ban MTTQ Việt Nam Xã Định Quán",
+    "Ủy ban MTTQ Việt Nam Phường Đồng Phú", "Ủy ban MTTQ Việt Nam Xã Đồng Tâm", "Ủy ban MTTQ Việt Nam Phường Đồng Xoài",
+    "Ủy ban MTTQ Việt Nam Xã Gia Kiệm", "Ủy ban MTTQ Việt Nam Xã Bù Đăng", "Ủy ban MTTQ Việt Nam Phường Hàng Gòn",
+    "Ủy ban MTTQ Việt Nam Phường Hố Nai", "Ủy ban MTTQ Việt Nam Xã Hưng Phước", "Ủy ban MTTQ Việt Nam Xã Hưng Thịnh",
+    "Ủy ban MTTQ Việt Nam Xã La Ngà", "Ủy ban MTTQ Việt Nam Xã Lộc Hưng", "Ủy ban MTTQ Việt Nam Phường Lộc Ninh",
+    "Ủy ban MTTQ Việt Nam Xã Lộc Quang", "Ủy ban MTTQ Việt Nam Xã Lộc Tấn", "Ủy ban MTTQ Việt Nam Xã Lộc Thành",
+    "Ủy ban MTTQ Việt Nam Xã Lộc Thạnh", "Ủy ban MTTQ Việt Nam Phường Long Bình", "Ủy ban MTTQ Việt Nam Xã Long Hà",
+    "Ủy ban MTTQ Việt Nam Phường Long Hưng", "Ủy ban MTTQ Việt Nam Phường Long Khánh", "Ủy ban MTTQ Việt Nam Xã Long Phước",
+    "Ủy ban MTTQ Việt Nam Phường Long Thành", "Ủy ban MTTQ Việt Nam Xã Minh Đức", "Ủy ban MTTQ Việt Nam Phường Minh Hưng",
+    "Ủy ban MTTQ Việt Nam Xã Nghĩa Trung", "Ủy ban MTTQ Việt Nam Xã Nha Bích", "Ủy ban MTTQ Việt Nam Phường Nhơn Trạch",
+    "Ủy ban MTTQ Việt Nam Xã Phú Hoà", "Ủy ban MTTQ Việt Nam Xã Phú Lâm", "Ủy ban MTTQ Việt Nam Xã Phú Lý",
+    "Ủy ban MTTQ Việt Nam Xã Phú Nghĩa", "Ủy ban MTTQ Việt Nam Xã Phú Riềng", "Ủy ban MTTQ Việt Nam Xã Phú Trung",
+    "Ủy ban MTTQ Việt Nam Xã Phú Vinh", "Ủy ban MTTQ Việt Nam Xã Phước An", "Ủy ban MTTQ Việt Nam Phường Phước Bình",
+    "Ủy ban MTTQ Việt Nam Phường Phước Long", "Ủy ban MTTQ Việt Nam Xã Phước Sơn", "Ủy ban MTTQ Việt Nam Phường Phước Tân",
+    "Ủy ban MTTQ Việt Nam Xã Phước Thái", "Ủy ban MTTQ Việt Nam Xã Sông Ray", "Ủy ban MTTQ Việt Nam Xã Tà Lài",
+    "Ủy ban MTTQ Việt Nam Phường Tam Hiệp", "Ủy ban MTTQ Việt Nam Phường Tam Phước", "Ủy ban MTTQ Việt Nam Xã Tân An",
+    "Ủy ban MTTQ Việt Nam Xã Tân Hưng", "Ủy ban MTTQ Việt Nam Phường Tân Khai", "Ủy ban MTTQ Việt Nam Xã Tân Lợi",
+    "Ủy ban MTTQ Việt Nam Phường Tân Phú", "Ủy ban MTTQ Việt Nam Xã Tân Quan", "Ủy ban MTTQ Việt Nam Xã Tân Tiến",
+    "Ủy ban MTTQ Việt Nam Phường Tân Triều", "Ủy ban MTTQ Việt Nam Xã Thanh Sơn", "Ủy ban MTTQ Việt Nam Xã Thiện Hưng",
+    "Ủy ban MTTQ Việt Nam Xã Thọ Sơn", "Ủy ban MTTQ Việt Nam Xã Thống Nhất", "Ủy ban MTTQ Việt Nam Xã Thuận Lợi",
+    "Ủy ban MTTQ Việt Nam Phường Trấn Biên", "Ủy ban MTTQ Việt Nam Phường Trảng Bom", "Ủy ban MTTQ Việt Nam Phường Trảng Dài",
+    "Ủy ban MTTQ Việt Nam Phường Trị An", "Ủy ban MTTQ Việt Nam Xã Xuân Bắc", "Ủy ban MTTQ Việt Nam Xã Xuân Định",
+    "Ủy ban MTTQ Việt Nam Xã Xuân Đông", "Ủy ban MTTQ Việt Nam Xã Xuân Đường", "Ủy ban MTTQ Việt Nam Xã Xuân Hoà",
+    "Ủy ban MTTQ Việt Nam Phường Xuân Lập", "Ủy ban MTTQ Việt Nam Phường Xuân Lộc", "Ủy ban MTTQ Việt Nam Xã Xuân Phú",
+    "Ủy ban MTTQ Việt Nam Xã Xuân Quế", "Ủy ban MTTQ Việt Nam Xã Xuân Thành",
+    "Hội Liên hiệp Phụ nữ thành phố Đồng Nai",
+    "Đoàn TNCS Hồ Chí Minh thành phố Đồng Nai",
+    "Hội Nông dân thành phố Đồng Nai",
+    "Hội Cựu chiến binh thành phố Đồng Nai",
+    "Liên đoàn Lao động thành phố Đồng Nai",
+    "Nhà Văn hóa Thanh thiếu nhi thành phố Đồng Nai",
+    "Hội Chữ thập đỏ thành phố Đồng Nai",
+    "Hội Khuyến học thành phố Đồng Nai",
+    "Hội Người cao tuổi thành phố Đồng Nai",
+    "Hội Cựu thanh niên xung phong thành phố Đồng Nai",
+    "Hội Nạn nhân chất độc da cam/dioxin thành phố Đồng Nai"
+  ];
+
+  var units = [];
+  for(var i=0; i<FALLBACK_UNITS.length; i++) {
+     units.push({unitName: FALLBACK_UNITS[i]});
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function on(id, evt, cb) { var el = $(id); if(el) el.addEventListener(evt, cb); }
+  function onClick(id, cb) { on(id, "click", cb); }
+  function onSubmit(id, cb) { on(id, "submit", cb); }
+  function onChange(id, cb) { on(id, "change", cb); }
+  function onInput(id, cb) { on(id, "input", cb); }
+  function onFocus(id, cb) { on(id, "focus", cb); }
+
+  function toast(msg, isErr){
+    var el = $("toast"); if(!el) return;
+    el.textContent = msg;
+    el.className = "toast show" + (isErr ? " error" : "");
+    setTimeout(function(){ if($("toast")) $("toast").className = "toast"; }, 3500);
+  }
+
+  function server(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function(res, rej) {
+      if(typeof google === 'undefined' || !google.script || !google.script.run) {
+        return rej(new Error("Lỗi kết nối Apps Script"));
+      }
+      var runner = google.script.run.withSuccessHandler(res).withFailureHandler(rej);
+      runner[fn].apply(runner, args);
+    });
+  }
+
+  server("recordVisit").then(function(data) {
+    if($("visitDaily")) $("visitDaily").textContent = data.daily;
+    if($("visitTotal")) $("visitTotal").textContent = data.total;
+  }).catch(function(e) {
+    if($("visitDaily")) $("visitDaily").textContent = "Lỗi";
+    if($("visitTotal")) $("visitTotal").textContent = "Lỗi";
+  });
+
+  function loadHeaderStats() {
+    server("getSubmittedReports", false).then(function(rawReports) {
+      globalReports = rawReports || [];
+      var total = 106;
+      
+      var uniqueUnits = [];
+      for(var i=0; i<globalReports.length; i++) {
+        if(uniqueUnits.indexOf(globalReports[i].unit) === -1) {
+           uniqueUnits.push(globalReports[i].unit);
+        }
+      }
+      var submitted = uniqueUnits.length;
+      
+      if($("headTotal")) $("headTotal").textContent = total;
+      if($("headSubmitted")) $("headSubmitted").textContent = submitted;
+      var rate = total ? Math.round((submitted / total) * 100) : 0;
+      if($("headRate")) $("headRate").textContent = rate + "%";
+    }).catch(function(e) { console.error(e); });
+  }
+
+  var navBtns = document.querySelectorAll(".navbtn[data-page]");
+  for(var i=0; i<navBtns.length; i++) {
+    navBtns[i].addEventListener("click", function(){
+      var allNavs = document.querySelectorAll(".navbtn[data-page]");
+      for(var j=0; j<allNavs.length; j++) allNavs[j].classList.remove("active");
+      
+      var allPages = document.querySelectorAll(".page");
+      for(var j=0; j<allPages.length; j++) allPages[j].classList.remove("active");
+      
+      this.classList.add("active");
+      var targetPage = $("page-" + this.dataset.page);
+      if(targetPage) targetPage.classList.add("active");
+      
+      if(this.dataset.page === "progress") loadProgressReport();
+      if(this.dataset.page === "summary") renderSummaryPeriodSelect();
+      if(this.dataset.page === "units" || this.dataset.page === "users") {
+        if(currentUser && (currentUser.role === "SUPER_ADMIN" || currentUser.role === "ADMIN")) {
+          loadUnitsAdmin();
+          loadAdhocPeriods();
+          if(currentUser.role === "SUPER_ADMIN") loadAccounts();
+        }
+      }
+    });
+  }
+
+  onClick("showLoginModal", function() { if($("loginModal")) $("loginModal").classList.add("show"); });
+  onClick("closeAdminModal", function() { if($("loginModal")) $("loginModal").classList.remove("show"); });
+
+  onSubmit("adminForm", function(e) {
+    e.preventDefault();
+    server("authenticateAdmin", $("adminUser").value, $("adminPass").value).then(function(res) {
+      if(res.success){
+        currentUser = res;
+        if($("loginModal")) $("loginModal").classList.remove("show");
+        renderAuthHeader();
+        toast("Đăng nhập Quản Trị thành công!");
+        
+        loadAdhocPeriods();
+        loadUnitsAdmin();
+        loadHeaderStats();
+      } else {
+        toast(res.message, true);
+      }
+    }).catch(function(err){ toast(err.message, true); });
+  });
+
+  function renderAuthHeader(){
+    if(!$("authSection")) return;
+    if(currentUser){
+      $("authSection").innerHTML = 
+        '<div class="auth-badge">' +
+          '<span>👤 ' + currentUser.fullName + ' (' + currentUser.role + ')</span>' +
+          '<button class="btn-pwd" id="openPwdBtn">🔑 Đổi MK</button>' +
+          '<button class="btn-logout" id="logoutBtn">Đăng xuất</button>' +
+        '</div>';
+      
+      onClick("logoutBtn", logout);
+      onClick("openPwdBtn", function() { if($("pwdModal")) $("pwdModal").classList.add("show"); });
+      
+      if($("navProgressBtn")) $("navProgressBtn").style.display = "inline-block";
+      if($("navSummaryBtn")) $("navSummaryBtn").style.display = "inline-block";
+      if($("navUnitsBtn")) $("navUnitsBtn").style.display = "inline-block"; 
+      if($("navUsersBtn")) $("navUsersBtn").style.display = "inline-block"; 
+      
+      if($("adminOnlySection")) {
+         $("adminOnlySection").style.display = (currentUser.role === "SUPER_ADMIN") ? "block" : "none";
+      }
+
+      if($("progAdminActions")) $("progAdminActions").style.display = "flex";
+
+      var summaryTab = document.querySelector('.navbtn[data-page="summary"]');
+      if(summaryTab) summaryTab.click();
+      runAggregateReport();
+    } else {
+      $("authSection").innerHTML = '<button type="button" class="btn-admin-login" id="showLoginModal">🔒 Đăng nhập Quản Trị</button>';
+      onClick("showLoginModal", function() { if($("loginModal")) $("loginModal").classList.add("show"); });
+      
+      if($("navProgressBtn")) $("navProgressBtn").style.display = "none";
+      if($("navSummaryBtn")) $("navSummaryBtn").style.display = "none";
+      if($("navUnitsBtn")) $("navUnitsBtn").style.display = "none";
+      if($("navUsersBtn")) $("navUsersBtn").style.display = "none";
+      if($("progAdminActions")) $("progAdminActions").style.display = "none";
+    }
+  }
+
+  onClick("closePwdModal", function() { if($("pwdModal")) $("pwdModal").classList.remove("show"); });
+  onSubmit("changePwdForm", function(e) {
+    e.preventDefault();
+    var oldP = $("oldPwd").value;
+    var newP = $("newPwd").value;
+    var cP = $("confirmPwd").value;
+    if(newP !== cP) return toast("Xác nhận mật khẩu mới không khớp!", true);
+
+    server("changeAdminPassword", currentUser.user, oldP, newP).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success){
+        $("changePwdForm").reset();
+        if($("pwdModal")) $("pwdModal").classList.remove("show");
+      }
+    }).catch(function(err){ toast(err.message, true); });
+  });
+
+  onClick("closeResetUserModal", function() { if($("resetUserModal")) $("resetUserModal").classList.remove("show"); });
+  onSubmit("resetUserForm", function(e) {
+    e.preventDefault();
+    var targetU = $("resetTargetUsername").value;
+    var newP = $("resetNewPwd").value;
+    server("resetUserPasswordBySuperAdmin", currentUser.role, targetU, newP).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success){
+        $("resetUserForm").reset();
+        if($("resetUserModal")) $("resetUserModal").classList.remove("show");
+      }
+    }).catch(function(err){ toast(err.message, true); });
+  });
+
+  window.openResetUserModal = function(username){
+    if($("resetTargetUsername")) $("resetTargetUsername").value = username;
+    if($("resetUserTargetText")) $("resetUserTargetText").innerHTML = "Tài khoản: <b>" + username + "</b>";
+    if($("resetNewPwd")) $("resetNewPwd").value = "";
+    if($("resetUserModal")) $("resetUserModal").classList.add("show");
+  };
+
+  window.deleteUserBySuperAdmin = function(row, username){
+    if(!confirm("Bạn có chắc chắn muốn XÓA vĩnh viễn tài khoản '" + username + "'?")) return;
+    server("deleteAccountBySuperAdmin", currentUser.role, row, username).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success) loadAccounts();
+    }).catch(function(err){ toast(err.message, true); });
+  };
+
+  function logout(){
+    currentUser = null;
+    renderAuthHeader();
+    toast("Đã đăng xuất tài khoản quản trị.");
+    var reportTab = document.querySelector('.navbtn[data-page="report"]');
+    if(reportTab) reportTab.click();
+    loadHeaderStats();
+    renderPeriod();
+  }
+
+  function loadUnits(){
+    units = [];
+    for(var i=0; i<FALLBACK_UNITS.length; i++) units.push({unitName: FALLBACK_UNITS[i]});
+    
+    if($("headTotal")) $("headTotal").textContent = units.length;
+    if($("unitCountLabel")) $("unitCountLabel").textContent = "Sẵn sàng (Đã nạp " + units.length + " đơn vị).";
+    renderUnitList("");
+
+    server("getUnitCatalog").then(function(result) {
+      if(result && result.length > 0) {
+        units = result;
+        if($("headTotal")) $("headTotal").textContent = units.length;
+        if($("unitCountLabel")) $("unitCountLabel").textContent = "Sẵn sàng (Đã cập nhật hệ thống).";
+      }
+      renderUnitList("");
+    }).catch(function(e){});
+  }
+
+  window.loadUnitsAdmin = function() {
+    if(!currentUser) return;
+    $("unitAdminTableBody").innerHTML = '<tr><td colspan="6" style="text-align:center">Đang tải...</td></tr>';
+    server("getAllUnitsAdmin", currentUser.role).then(function(res) {
+      if(res.success) {
+        allUnitsAdmin = res.units;
+        renderUnitAdminTable();
+      }
+    }).catch(function(e) { $("unitAdminTableBody").innerHTML = '<tr><td colspan="6" style="text-align:center;color:red">Lỗi tải dữ liệu.</td></tr>'; });
+  }
+
+  function renderUnitAdminTable() {
+    var tbody = $("unitAdminTableBody");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+    if(allUnitsAdmin.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Chưa có đơn vị nào trong CSDL.</td></tr>';
+        return;
+    }
+    for(var i=0; i<allUnitsAdmin.length; i++) {
+        var u = allUnitsAdmin[i];
+        var tr = document.createElement("tr");
+        var activeHtml = (u.active.toLowerCase() === "có") ? '<span style="color:#07855b;font-weight:700">● Hoạt động</span>' : '<span style="color:#dc2626;font-weight:700">○ Đã khóa</span>';
+        tr.innerHTML = '<td>' + (i+1) + '</td>' +
+            '<td>' + u.groupCode + '</td>' +
+            '<td><b>' + u.unitName + '</b></td>' +
+            '<td>' + u.unitType + '</td>' +
+            '<td>' + activeHtml + '</td>' +
+            '<td>' +
+              '<div class="action-btn-group">' +
+                '<button type="button" class="btn-sm-pwd" onclick="openEditUnitModal(' + i + ')">✏️ Sửa</button>' +
+                '<button type="button" class="btn-sm-del" onclick="deleteUnitAdmin(' + u.row + ', \'' + u.unitName + '\')">🗑 Xóa</button>' +
+              '</div>' +
+            '</td>';
+        tbody.appendChild(tr);
+    }
+  }
+
+  window.openAddUnitModal = function() {
+    $("unitRowId").value = "";
+    $("unitForm").reset();
+    $("unitModalTitle").textContent = "Thêm Đơn Vị Mới";
+    $("unitModal").classList.add("show");
+  };
+
+  window.openEditUnitModal = function(index) {
+    var u = allUnitsAdmin[index];
+    $("unitRowId").value = u.row;
+    $("uGroupCode").value = u.groupCode;
+    $("uGroupName").value = u.groupName;
+    $("uUnitName").value = u.unitName;
+    $("uUnitType").value = u.unitType;
+    $("uActive").value = (u.active.toLowerCase() === "có") ? "Có" : "Không";
+    $("unitModalTitle").textContent = "Sửa Đơn Vị";
+    $("unitModal").classList.add("show");
+  };
+
+  onSubmit("unitForm", function(e) {
+    e.preventDefault();
+    var row = $("unitRowId").value;
+    var data = {
+      groupCode: $("uGroupCode").value,
+      groupName: $("uGroupName").value,
+      unitName: $("uUnitName").value,
+      unitType: $("uUnitType").value,
+      active: $("uActive").value
+    };
+    
+    var req = row ? server("editUnitAdmin", currentUser.role, row, data) : server("addUnitAdmin", currentUser.role, data);
+    req.then(function(res) {
+      toast(res.message, !res.success);
+      if(res.success) {
+        $("unitModal").classList.remove("show");
+        loadUnitsAdmin();
+        loadUnits(); 
+      }
+    }).catch(function(err) { toast(err.message, true); });
+  });
+
+  window.deleteUnitAdmin = function(row, name) {
+    if(!confirm('⚠️ LƯU Ý: Xác nhận XÓA vĩnh viễn đơn vị:\n' + name + '\n\nĐơn vị này sẽ không còn hiển thị ở màn hình nộp báo cáo nữa.')) return;
+    server("deleteUnitAdmin", currentUser.role, row).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success) {
+         loadUnitsAdmin();
+         loadUnits(); 
+      }
+    }).catch(function(err) { toast(err.message, true); });
+  };
+
+  function parseAdhocDesc(desc) {
+    if(!desc) return { targets: [], questions: [] };
+    try {
+      var obj = JSON.parse(desc);
+      if(obj.questions) return obj;
+    } catch(e) {}
+    return { targets: [], questions: [{q: desc, t: "text"}] };
+  }
+
+  function loadAdhocPeriods() {
+    server("getAdhocPeriods").then(function(res){
+      globalAdhocPeriods = res || [];
+      renderPeriod(); 
+      renderProgPeriodSelect();
+      renderSummaryPeriodSelect(); 
+      renderAdhocTable(); 
+    }).catch(function(e){});
+  }
+
+  function renderAdhocTable() {
+    var tbody = $("adhocTableBody");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+    if(globalAdhocPeriods.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Chưa có đợt đột xuất nào.</td></tr>';
+        return;
+    }
+    for(var i=0; i<globalAdhocPeriods.length; i++) {
+        var p = globalAdhocPeriods[i];
+        var config = parseAdhocDesc(p.desc);
+        var hasForm = config.questions.length > 0 && config.questions[0].q !== "";
+        var tr = document.createElement("tr");
+        var statusHtml = p.status === "KHÓA" ? '<span style="color:#dc2626;font-weight:700">● Đã khóa (Ẩn)</span>' : '<span style="color:#07855b;font-weight:700">● Đang mở</span>';
+        var formInfo = hasForm ? '(Gồm ' + config.questions.length + ' câu hỏi)' : '';
+        tr.innerHTML = '<td>' + (i+1) + '</td>' +
+            '<td><b>' + p.name + '</b><br><i style="font-size:10px;color:#666">' + formInfo + '</i></td>' +
+            '<td>' + statusHtml + '</td>' +
+            '<td>' +
+              '<div class="action-btn-group">' +
+                '<button type="button" class="btn-sm-pwd" onclick="openEditAdhocModal(' + i + ')">✏️ Sửa Form</button>' +
+                '<button type="button" class="btn-sm-toggle" onclick="toggleAdhoc(\'' + p.name + '\', \'' + p.status + '\')">' + (p.status === 'KHÓA' ? 'Mở Khóa' : 'Khóa Đợt') + '</button>' +
+                '<button type="button" class="btn-sm-del" onclick="deleteAdhoc(\'' + p.name + '\')">🗑️ Xóa</button>' +
+              '</div>' +
+            '</td>';
+        tbody.appendChild(tr);
+    }
+  }
+
+  window.addAdminQuestion = function(qText, qType) {
+     qText = qText || "";
+     qType = qType || "text";
+     var list = $("adminQuestionList");
+     var row = document.createElement("div");
+     row.className = "admin-q-row";
+     row.style.cssText = "display:flex; gap:10px; margin-bottom:8px; align-items:center;";
+     row.innerHTML = 
+        '<input type="text" class="field q-text" placeholder="Nhập câu hỏi..." value="' + qText + '" style="flex:2">' +
+        '<select class="field q-type" style="flex:1">' +
+           '<option value="text" ' + (qType==='text'?'selected':'') + '>Chữ (Văn bản)</option>' +
+           '<option value="number" ' + (qType==='number'?'selected':'') + '>Số lượng (Cộng dồn được)</option>' +
+        '</select>' +
+        '<button type="button" class="btn-sm-del" onclick="this.parentElement.remove()" style="padding:6px 10px">✕</button>';
+     list.appendChild(row);
+  };
+
+  window.renderAdminAdhocUnitCheckboxes = function() {
+    var container = $("adminAdhocUnitCheckboxes");
+    if(!container) return;
+    container.innerHTML = "";
+    
+    if(units.length === 0) {
+      container.innerHTML = '<span style="font-size:12px;color:#666">Đang tải danh mục đơn vị...</span>';
+      return;
+    }
+
+    for(var i=0; i<units.length; i++) {
+      var u = units[i];
+      var isChecked = adminAdhocSelectedUnitsArray.indexOf(u.unitName) > -1 ? "checked" : "";
+      var label = document.createElement("label");
+      label.className = "checkbox-chip";
+      label.innerHTML = '<input type="checkbox" value="' + u.unitName + '" ' + isChecked + '> ' + u.unitName;
+      container.appendChild(label);
+    }
+  }
+
+  window.checkAllAdhocUnits = function(isCheck) {
+    var checkboxes = document.querySelectorAll('#adminAdhocUnitCheckboxes input[type="checkbox"]');
+    for(var i=0; i<checkboxes.length; i++) checkboxes[i].checked = isCheck;
+  }
+
+  window.openAddAdhocModal = function() {
+    $("adhocOldName").value = "";
+    $("adhocForm").reset();
+    $("adminQuestionList").innerHTML = "";
+    addAdminQuestion(); 
+    
+    adminAdhocSelectedUnitsArray = [];
+    renderAdminAdhocUnitCheckboxes();
+    
+    $("adhocModalTitle").textContent = "Tạo Đợt Báo Cáo Mới (Kèm Form)";
+    $("adhocModal").classList.add("show");
+  };
+
+  window.openEditAdhocModal = function(index) {
+    var p = globalAdhocPeriods[index];
+    var config = parseAdhocDesc(p.desc);
+    
+    $("adhocOldName").value = p.name;
+    $("uAdhocName").value = p.name.replace("Đột xuất: ", "");
+    
+    $("adminQuestionList").innerHTML = "";
+    if(config.questions.length === 0) {
+       addAdminQuestion();
+    } else {
+       for(var i=0; i<config.questions.length; i++) addAdminQuestion(config.questions[i].q, config.questions[i].t);
+    }
+
+    adminAdhocSelectedUnitsArray = config.targets || [];
+    renderAdminAdhocUnitCheckboxes();
+
+    $("adhocModalTitle").textContent = "Sửa Thông Tin Đợt & Câu Hỏi";
+    $("adhocModal").classList.add("show");
+  };
+
+  onSubmit("adhocForm", function(e) {
+    e.preventDefault();
+    var oldName = $("adhocOldName").value;
+    var newName = $("uAdhocName").value.trim();
+    
+    var questions = [];
+    var qRows = document.querySelectorAll(".admin-q-row");
+    for(var i=0; i<qRows.length; i++) {
+       var qT = qRows[i].querySelector(".q-text").value.trim();
+       var qType = qRows[i].querySelector(".q-type").value;
+       if(qT) questions.push({q: qT, t: qType});
+    }
+
+    var checkedUnits = [];
+    var cbs = document.querySelectorAll('#adminAdhocUnitCheckboxes input[type="checkbox"]:checked');
+    for(var i=0; i<cbs.length; i++) checkedUnits.push(cbs[i].value);
+
+    var descObj = { targets: checkedUnits, questions: questions };
+    var descJson = JSON.stringify(descObj);
+    
+    if(!newName) return toast("Vui lòng nhập tên đợt đột xuất!", true);
+    
+    var btn = $("btnSaveAdhoc");
+    if(btn) btn.disabled = true;
+    
+    var req = oldName ? server("editAdhocPeriod", currentUser.role, oldName, newName, descJson) : server("addAdhocPeriod", currentUser.role, currentUser.user, newName, descJson);
+    
+    req.then(function(res){
+        toast(res.message, !res.success);
+        if(res.success) {
+            $("adhocModal").classList.remove("show");
+            loadAdhocPeriods();
+            loadHeaderStats();
+        }
+        if(btn) btn.disabled = false;
+    }).catch(function(e){ 
+        toast(e.message, true); 
+        if(btn) btn.disabled = false;
+    });
+  });
+
+  window.toggleAdhoc = function(name, status) {
+    toast("Đang cập nhật trạng thái...");
+    server("toggleAdhocPeriod", currentUser.role, name, status).then(function(res){
+        toast(res.message, !res.success);
+        if(res.success) loadAdhocPeriods();
+    }).catch(function(e){ toast(e.message, true); });
+  }
+
+  window.deleteAdhoc = function(name) {
+    if(!confirm('Bạn có chắc muốn xóa đợt "' + name + '"?\nCác đơn vị sẽ không thể nộp thêm vào đợt này nữa (Báo cáo cũ vẫn giữ nguyên).')) return;
+    server("deleteAdhocPeriod", currentUser.role, name).then(function(res){
+        toast(res.message, !res.success);
+        if(res.success) loadAdhocPeriods();
+    }).catch(function(e){ toast(e.message, true); });
+  }
+
+  window.renderSelectedUnits = function() {
+    var container = $("selectedUnitsContainer");
+    if(!container) return;
+    container.innerHTML = "";
+    for(var i=0; i<selectedUnitsArray.length; i++) {
+        var u = selectedUnitsArray[i];
+        var chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = u + ' <span class="chip-close" onclick="removeUnit(\'' + u + '\')">&times;</span>';
+        container.appendChild(chip);
+    }
+    $("unitValue").value = selectedUnitsArray.join(",");
+  }
+
+  window.removeUnit = function(u) {
+      var newArr = [];
+      for(var i=0; i<selectedUnitsArray.length; i++) {
+         if(selectedUnitsArray[i] !== u) newArr.push(selectedUnitsArray[i]);
+      }
+      selectedUnitsArray = newArr;
+      renderSelectedUnits();
+  }
+
+  function renderUnitList(q){
+    var list = $("unitList"); 
+    if(!list) return;
+    list.innerHTML = "";
+
+    var baseUnits = units;
+    if (periodType === "Đột xuất" && currentAllowedUnits.length > 0) {
+        var tempUnits = [];
+        for(var i=0; i<units.length; i++) {
+           if(currentAllowedUnits.indexOf(units[i].unitName) > -1) tempUnits.push(units[i]);
+        }
+        baseUnits = tempUnits;
+    }
+
+    q = (q || "").toLowerCase().trim();
+    var filter = [];
+    for(var i=0; i<baseUnits.length; i++) {
+       if(baseUnits[i].unitName.toLowerCase().indexOf(q) > -1) filter.push(baseUnits[i]);
+    }
+
+    if(filter.length === 0){ list.innerHTML = '<div class="opt" style="color:#888">Không tìm thấy đơn vị.</div>'; return; }
+    
+    for(var i=0; i<filter.length; i++) {
+      (function(u){
+          var d = document.createElement("div"); d.className = "opt"; d.textContent = u.unitName;
+          d.addEventListener("click", function() {
+            if(selectedUnitsArray.indexOf(u.unitName) === -1) {
+                selectedUnitsArray.push(u.unitName);
+                renderSelectedUnits();
+            }
+            $("unitSearch").value = "";
+            renderUnitList("");
+            list.classList.remove("show");
+          });
+          list.appendChild(d);
+      })(filter[i]);
+    }
+  }
+
+  onFocus("unitSearch", function(){ if($("unitList")) $("unitList").classList.add("show"); renderUnitList($("unitSearch") ? $("unitSearch").value : ""); });
+  onInput("unitSearch", function(){ if($("unitValue")) $("unitValue").value = ""; if($("unitList")) $("unitList").classList.add("show"); renderUnitList($("unitSearch") ? $("unitSearch").value : ""); });
+  document.addEventListener("click", function(e){ var combo = $("combo"); if(combo && !combo.contains(e.target) && $("unitList")) $("unitList").classList.remove("show"); });
+
+  function buildYearOptions(selectedYear) {
+    var opts = "";
+    for(var j = 2024; j <= 2030; j++) {
+      opts += '<option value="' + j + '" ' + (j === selectedYear ? 'selected' : '') + '>' + j + '</option>';
+    }
+    return opts;
+  }
+
+  function renderPeriod(){
+    var periodBtns = document.querySelectorAll(".period");
+    for(var i=0; i<periodBtns.length; i++) {
+       if(periodBtns[i].dataset.type === periodType) periodBtns[i].classList.add("active");
+       else periodBtns[i].classList.remove("active");
+    }
+
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1;
+    var html = "";
+    var detailBox = $("periodDetail");
+    if(!detailBox) return;
+    
+    var dynArea = $("dynamicFormArea");
+    var oldTextHint = $("adhocHint");
+    var oldTextContent = $("textContent");
+    if(dynArea) dynArea.style.display = "none";
+    if(oldTextHint) oldTextHint.style.display = "none";
+    if(oldTextContent) {
+       oldTextContent.style.display = "block";
+       oldTextContent.placeholder = "Nhập nội dung báo cáo trực tiếp vào đây (Nếu không có file đính kèm)...";
+    }
+
+    currentAllowedUnits = [];
+    selectedUnitsArray = [];
+    renderSelectedUnits();
+
+    if(periodType === "Tháng"){
+      detailBox.className = "detail";
+      var mOpts = "";
+      for(var i=1; i<=12; i++) {
+         var sm = String(i).padStart(2,'0');
+         mOpts += '<option value="Tháng ' + sm + '" ' + (i===m?'selected':'') + '>Tháng ' + sm + '</option>';
+      }
+      html = '<div><label class="label">Tháng</label><select id="pM" class="field">' + mOpts + '</select></div>' +
+        '<div><label class="label">Năm</label><select id="pY" class="field">' + buildYearOptions(y) + '</select></div>';
+    } else if(periodType === "Quý"){
+      detailBox.className = "detail";
+      var q = Math.ceil(m/3);
+      html = '<div><label class="label">Quý</label><select id="pQ" class="field"><option value="Quý I" ' + (q===1?'selected':'') + '>Quý I</option><option value="Quý II" ' + (q===2?'selected':'') + '>Quý II</option><option value="Quý III" ' + (q===3?'selected':'') + '>Quý III</option><option value="Quý IV" ' + (q===4?'selected':'') + '>Quý IV</option></select></div>' +
+        '<div><label class="label">Năm</label><select id="pY" class="field">' + buildYearOptions(y) + '</select></div>';
+    } else if(periodType === "Năm"){
+      detailBox.className = "detail single";
+      html = '<div><label class="label">Năm báo cáo</label><select id="pY" class="field">' + buildYearOptions(y) + '</select></div>';
+    } else if(periodType === "Đột xuất"){
+      var activePeriods = [];
+      for(var i=0; i<globalAdhocPeriods.length; i++) {
+         if(globalAdhocPeriods[i].status !== "KHÓA") activePeriods.push(globalAdhocPeriods[i]);
+      }
+      if(activePeriods.length > 0){
+        var opts = "";
+        for(var i=0; i<activePeriods.length; i++) opts += '<option value="' + activePeriods[i].name + '">' + activePeriods[i].name + '</option>';
+        detailBox.className = "detail single";
+        html = '<div><label class="label">Tên đợt báo cáo đột xuất <span style="color:red">*</span></label>' +
+                  '<select id="pCustomSelect" class="field">' +
+                    '<option value="" disabled selected>-- Chọn đợt đã được mở --</option>' +
+                    opts +
+                  '</select>' +
+                '</div>';
+      } else {
+        detailBox.className = "detail single";
+        html = '<div style="color:#a51515; font-size:12px; font-weight:bold; padding:10px 0;">Hiện tại chưa có đợt báo cáo đột xuất nào được mở. Admin vui lòng vào tab Quản trị để tạo đợt mới.</div>';
+      }
+    }
+    detailBox.innerHTML = html;
+
+    var selAdhoc = $("pCustomSelect");
+    if(selAdhoc) {
+       selAdhoc.addEventListener("change", function() {
+          var pObj = null;
+          for(var i=0; i<globalAdhocPeriods.length; i++) {
+             if(globalAdhocPeriods[i].name === this.value) { pObj = globalAdhocPeriods[i]; break; }
+          }
+          
+          selectedUnitsArray = [];
+          renderSelectedUnits();
+
+          if(pObj && pObj.desc) {
+             var config = parseAdhocDesc(pObj.desc);
+             currentAllowedUnits = config.targets || [];
+
+             if (config.questions.length > 0 && config.questions[0].q !== "") {
+                 if(oldTextHint) oldTextHint.style.display = "none";
+                 if(oldTextContent) oldTextContent.style.display = "none";
+                 
+                 var dynHtml = '<div class="form-grid-2col">';
+                 for(var i=0; i<config.questions.length; i++) {
+                    var q = config.questions[i];
+                    dynHtml += '<div class="form-grid-label">' + q.q + '</div>';
+                    var pType = q.t === 'number' ? 'number' : 'text';
+                    var pPlace = q.t === 'number' ? 'Nhập số...' : 'Nhập nội dung...';
+                    dynHtml += '<div><input type="' + pType + '" class="field dynamic-answer" data-q="' + q.q + '" placeholder="' + pPlace + '"></div>';
+                 }
+                 dynHtml += '</div>';
+                 
+                 if($("dynamicFormContainer")) $("dynamicFormContainer").innerHTML = dynHtml;
+                 if(dynArea) dynArea.style.display = "block";
+             } else {
+                 if(dynArea) dynArea.style.display = "none";
+                 if(oldTextContent) {
+                   oldTextContent.style.display = "block";
+                   oldTextContent.placeholder = "Nhập nội dung báo cáo trực tiếp vào đây (Nếu không có file đính kèm)...";
+                 }
+             }
+          }
+       });
+       selAdhoc.dispatchEvent(new Event('change'));
+    }
+  }
+
+  function getPeriodStr(){
+    var y = $("pY") ? $("pY").value : new Date().getFullYear();
+    if(periodType === "Tháng") return ($("pM") ? $("pM").value : "") + "/" + y;
+    if(periodType === "Quý") return ($("pQ") ? $("pQ").value : "") + "/" + y;
+    if(periodType === "Năm") return "Năm " + y;
+    if(periodType === "Đột xuất"){
+      return $("pCustomSelect") ? $("pCustomSelect").value : "";
+    }
+    return "Khác";
+  }
+
+  onChange("fileInput", function(){
+    var f = this.files && this.files[0]; if(!f) return;
+    selectedFileInfo = {name: f.name, type: f.type ? f.type : "application/octet-stream"};
+    if($("fileMeta")) $("fileMeta").textContent = f.name + " (" + (f.size/1024/1024).toFixed(2) + " MB)";
+    var r = new FileReader(); r.onload = function(e) { selectedFileData = e.target.result; }; r.readAsDataURL(f);
+  });
+
+  onSubmit("reportForm", function(e) {
+    e.preventDefault();
+    var unit = $("unitValue") ? $("unitValue").value : "";
+    if(!unit) return toast("Vui lòng chọn ít nhất 1 đơn vị!", true);
+    
+    var pVal = getPeriodStr();
+    if (periodType === "Đột xuất" && (!pVal || pVal === "")) {
+      return toast("Vui lòng chọn kỳ báo cáo đột xuất!", true);
+    }
+    
+    var compiledText = "";
+    var dynArea = $("dynamicFormArea");
+    if (dynArea && dynArea.style.display !== "none") {
+       var answers = [];
+       var dynInps = document.querySelectorAll(".dynamic-answer");
+       for(var i=0; i<dynInps.length; i++) {
+          var inp = dynInps[i];
+          if(inp.value.trim() !== "") {
+             answers.push(inp.dataset.q + ": " + inp.value.trim());
+          }
+       }
+       compiledText = answers.join("\n");
+    } else {
+       compiledText = $("textContent") ? $("textContent").value.trim() : "";
+    }
+
+    if(!selectedFileData && !compiledText) {
+      return toast("Vui lòng đính kèm file HOẶC điền nội dung báo cáo!", true);
+    }
+
+    var btn = $("submitBtn"); 
+    if(btn){ btn.disabled = true; btn.textContent = "Đang gửi..."; }
+    
+    server("saveReport", {
+      unit: unit, periodType: periodType, periodValue: pVal,
+      fileName: selectedFileInfo ? selectedFileInfo.name : "", 
+      fileData: selectedFileData, 
+      mimeType: selectedFileInfo ? selectedFileInfo.type : "",
+      textContent: compiledText
+    }).then(function(res){
+      if(!res.success) throw new Error(res.message);
+      
+      if($("successMessageText")) $("successMessageText").textContent = res.message;
+      if($("successModal")) $("successModal").classList.add("show");
+      
+      if($("reportForm")) $("reportForm").reset();
+      selectedUnitsArray = [];
+      renderSelectedUnits();
+      selectedFileData = ""; selectedFileInfo = null;
+      if($("unitValue")) $("unitValue").value = ""; 
+      if($("unitSearch")) $("unitSearch").value = "";
+      if($("fileMeta")) $("fileMeta").textContent = "Tối đa 25MB";
+      renderPeriod();
+      loadHeaderStats();
+      if(btn){ btn.disabled = false; btn.textContent = "✈ Gửi Báo Cáo"; }
+    }).catch(function(err){ 
+       toast(err.message ? err.message : String(err), true); 
+       if(btn){ btn.disabled = false; btn.textContent = "✈ Gửi Báo Cáo"; }
+    });
+  });
+
+  window.deleteItem = function(id, unitName, periodValue){
+    if(!confirm('Xác nhận xóa báo cáo của đơn vị:\n' + unitName + '\nKỳ: ' + periodValue + '\n\nThao tác này sẽ cho phép đơn vị nộp lại báo cáo.')) return;
+    server("deleteReportAdvanced", id, unitName, periodValue).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success){
+        loadHeaderStats();
+        if($("page-progress").classList.contains("active")) loadProgressReport();
+        if($("page-summary").classList.contains("active")) runAggregateReport();
+      }
+    }).catch(function(err){ toast(err.message ? err.message : String(err), true); });
+  };
+
+  window.showText = function(id) {
+    var report = null;
+    for(var i=0; i<currentSummaryDetails.length; i++) {
+        if(String(currentSummaryDetails[i].id) === String(id)) { report = currentSummaryDetails[i]; break; }
+    }
+    if(!report) {
+       for(var i=0; i<currentProgDetails.length; i++) {
+          if(String(currentProgDetails[i].id) === String(id)) { report = currentProgDetails[i]; break; }
+       }
+    }
+    if(report && report.textContent) {
+       $("viewTextContent").textContent = report.textContent;
+       $("viewTextModal").classList.add("show");
+    } else {
+       toast("Báo cáo này không có nội dung văn bản.", true);
+    }
+  }
+
+  onChange("progFilterType", function() { renderProgPeriodSelect(); loadProgressReport(); });
+  onChange("progStatusFilter", function() { if(currentProgDetails.length > 0) renderProgTable(currentProgDetails); });
+  onClick("btnRunProg", loadProgressReport);
+
+  function renderProgPeriodSelect(){
+    var t = $("progFilterType") ? $("progFilterType").value : "ALL";
+    var box = $("progPeriodValueBox");
+    if(!box) return;
+
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1, q = Math.ceil(m/3);
+
+    if (t === "ALL") {
+       box.innerHTML = "";
+    } else if(t === "Tháng"){
+      var mOpts = "";
+      for(var i=1; i<=12; i++) {
+         var sm = String(i).padStart(2,'0');
+         mOpts += '<option value="Tháng ' + sm + '" ' + (i===m?'selected':'') + '>Tháng ' + sm + '</option>';
+      }
+      box.innerHTML = '<select id="progMonth" class="field" style="padding:8px; max-width:110px;">' + mOpts + '</select>' +
+                      '<select id="progYear" class="field" style="padding:8px; max-width:80px;">' + buildYearOptions(y) + '</select>';
+    } else if(t === "Quý"){
+      box.innerHTML = '<select id="progQuarter" class="field" style="padding:8px; max-width:100px;"><option value="Quý I" ' + (q===1?'selected':'') + '>Quý I</option><option value="Quý II" ' + (q===2?'selected':'') + '>Quý II</option><option value="Quý III" ' + (q===3?'selected':'') + '>Quý III</option><option value="Quý IV" ' + (q===4?'selected':'') + '>Quý IV</option></select>' +
+                      '<select id="progYear" class="field" style="padding:8px; max-width:80px;">' + buildYearOptions(y) + '</select>';
+    } else if(t === "Năm"){
+      box.innerHTML = '<select id="progYear" class="field" style="padding:8px; max-width:100px;">' + buildYearOptions(y) + '</select>';
+    } else if(t === "Đột xuất"){
+      var dxSet = [];
+      for(var i=0; i<globalAdhocPeriods.length; i++) {
+         if(dxSet.indexOf(globalAdhocPeriods[i].name) === -1) dxSet.push(globalAdhocPeriods[i].name);
+      }
+      for(var i=0; i<globalReports.length; i++) {
+         if(globalReports[i].periodType === "Đột xuất") {
+            if(dxSet.indexOf(globalReports[i].periodValue) === -1) dxSet.push(globalReports[i].periodValue);
+         }
+      }
+      
+      var adminBtn = currentUser ? '<button type="button" class="btn-sync" style="padding:8px 12px; background:#ea580c; border:none; border-radius:8px;" onclick="document.querySelector(\'.navbtn[data-page=\\\'users\\\']\').click();">+ Quản lý đợt</button>' : '';
+      if(dxSet.length > 0){
+        var opts = "";
+        for(var i=0; i<dxSet.length; i++) opts += '<option value="' + dxSet[i] + '">' + dxSet[i] + '</option>';
+        box.innerHTML = '<select id="progDotXuat" class="field" style="padding:8px; min-width:140px;">' + opts + '</select> ' + adminBtn;
+      } else {
+        box.innerHTML = '<input id="progDotXuat" class="field" style="padding:8px; max-width:140px;" placeholder="Chưa có đợt" value="Đột xuất"> ' + adminBtn;
+      }
+    }
+  }
+
+  function getSelectedProgPeriodStr(){
+    var t = $("progFilterType") ? $("progFilterType").value : "ALL";
+    if(t === "Tháng") return ($("progMonth") ? $("progMonth").value : "") + "/" + ($("progYear") ? $("progYear").value : "");
+    if(t === "Quý") return ($("progQuarter") ? $("progQuarter").value : "") + "/" + ($("progYear") ? $("progYear").value : "");
+    if(t === "Năm") return $("progYear") ? $("progYear").value : "";
+    if(t === "Đột xuất") return $("progDotXuat") ? $("progDotXuat").value : "Đột xuất";
+    return "ALL";
+  }
+
+  function loadProgressReport(){
+    var t = $("progFilterType") ? $("progFilterType").value : "ALL";
+    var v = getSelectedProgPeriodStr();
+    var btn = $("btnRunProg");
+    if(btn) { btn.disabled = true; btn.textContent = "⏳ Đang tải..."; }
+    
+    server("getAggregateReport", t, v).then(function(res){
+      if(!res.success) throw new Error(res.message);
+      
+      var s = res.summary;
+      if($("pCurPeriod")) $("pCurPeriod").textContent = s.filterValue;
+      if($("pSubmitted")) $("pSubmitted").textContent = s.submittedCount + " / " + s.total;
+      if($("pPending")) $("pPending").textContent = s.pendingCount;
+      if($("pRate")) $("pRate").textContent = s.rate + "%";
+
+      var btnFolder = $("btnProgOpenDrive");
+      if(btnFolder){
+        if (s.folderUrl) {
+          btnFolder.dataset.href = s.folderUrl;
+          btnFolder.style.display = "inline-flex";
+        } else {
+          btnFolder.style.display = "none";
+        }
+      }
+
+      var btnZip = $("btnProgDownloadZip");
+      if(btnZip){
+        if (s.submittedCount > 0) {
+          btnZip.style.display = "inline-flex";
+        } else {
+          btnZip.style.display = "none";
+        }
+      }
+
+      currentProgDetails = res.details ? res.details : [];
+      renderProgTable(currentProgDetails);
+      if(btn) { btn.disabled = false; btn.textContent = "🔄 Cập nhật"; }
+    }).catch(function(err){
+      toast(err.message ? err.message : String(err), true);
+      if(btn) { btn.disabled = false; btn.textContent = "🔄 Cập nhật"; }
+    });
+  }
+
+  function renderProgTable(details){
+    var tbody = $("progressBody");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+
+    var isAdmin = currentUser !== null;
+    var thead = $("tableHeadProg");
+    if(thead){
+      if(isAdmin){
+        thead.innerHTML = '<tr><th>STT</th><th>Đơn vị</th><th>Loại kỳ</th><th>Kỳ báo cáo</th><th>Thời gian nộp</th><th>Tệp / Nội dung</th><th>Tác vụ Admin</th></tr>';
+      } else {
+        thead.innerHTML = '<tr><th>STT</th><th>Đơn vị</th><th>Loại kỳ</th><th>Kỳ báo cáo</th><th>Thời gian nộp</th><th>Trạng thái</th></tr>';
+      }
+    }
+
+    if(!details || !details.length){
+      tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 7 : 6) + '" style="text-align:center">Vui lòng bấm nút tải dữ liệu.</td></tr>';
+      return;
+    }
+
+    var statusFilter = $("progStatusFilter") ? $("progStatusFilter").value : "ALL";
+    var filteredDetails = [];
+    for(var i=0; i<details.length; i++) {
+       if (statusFilter === "ALL") filteredDetails.push(details[i]);
+       else if (statusFilter === "SUBMITTED" && details[i].isSubmitted) filteredDetails.push(details[i]);
+       else if (statusFilter === "PENDING" && !details[i].isSubmitted) filteredDetails.push(details[i]);
+    }
+
+    if(!filteredDetails.length){
+      tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 7 : 6) + '" style="text-align:center">Không có đơn vị nào phù hợp.</td></tr>';
+      return;
+    }
+
+    for(var i=0; i<filteredDetails.length; i++) {
+      var d = filteredDetails[i];
+      var tr = document.createElement("tr");
+      var statusBadge = d.isSubmitted
+        ? '<span style="color:#07855b;font-weight:800">● Đã nộp</span>'
+        : '<span style="color:#dc2626;font-weight:800">○ Chưa nộp</span>';
+      
+      var links = [];
+      if(d.fileUrl) links.push('<a href="' + d.fileUrl + '" target="_blank" style="color:#b81515;font-weight:700;white-space:nowrap;">📄 File đính kèm</a>');
+      if(d.textContent) links.push('<a href="javascript:void(0)" onclick="showText(\'' + d.id + '\')" style="color:#0b9b68;font-weight:700;white-space:nowrap;">📝 Xem nội dung</a>');
+      var fileLink = links.join(" <br/> ") || '-';
+
+      var actionCol = '';
+      if (isAdmin) {
+        if (d.isSubmitted) {
+          actionCol = '<td style="text-align:center"><button type="button" class="btn-sm-del" onclick="deleteItem(\'' + d.id + '\', \'' + d.unitName + '\', \'' + d.periodValue + '\')">Xóa (Mở khóa)</button></td>';
+        } else {
+          actionCol = '<td style="text-align:center;color:#94a3b8">-</td>';
+        }
+      }
+
+      var rowHtml = '<td>' + (i+1) + '</td>' +
+          '<td><b>' + d.unitName + '</b></td>' +
+          '<td><span style="background:#e2e8f0;padding:3px 6px;border-radius:4px;font-size:9.5px;font-weight:700">' + d.periodType + '</span></td>' +
+          '<td>' + d.periodValue + '</td>' +
+          '<td>' + d.timestamp + '</td>' +
+          '<td>' + fileLink + '</td>';
+
+      if(isAdmin) {
+        rowHtml += actionCol;
+      } else {
+        rowHtml += '<td>' + statusBadge + '</td>';
+      }
+      tr.innerHTML = rowHtml;
+      tbody.appendChild(tr);
+    }
+  }
+
+  onClick("btnProgOpenDrive", function() {
+    var url = $("btnProgOpenDrive").dataset.href;
+    if(url) window.open(url, "_blank");
+  });
+
+  onClick("btnProgDownloadZip", function() {
+    var t = $("progFilterType") ? $("progFilterType").value : "ALL";
+    var v = getSelectedProgPeriodStr();
+    
+    if(!currentProgDetails.length) {
+      return toast("Vui lòng tải số liệu trước khi nén file!", true);
+    }
+    
+    var btn = $("btnProgDownloadZip");
+    if(!btn) return;
+    var originalText = btn.innerHTML;
+    btn.disabled = true; 
+    btn.innerHTML = "⏳ Đang nén...";
+    toast("Hệ thống đang nén file. Quá trình này có thể mất vài chục giây.");
+
+    server("zipAndDownloadReports", t, v).then(function(res){
+      if(!res.success) throw new Error(res.message);
+      
+      var a = document.createElement('a');
+      a.href = res.downloadUrl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      toast(`Đã tải thành công file ZIP chứa ${res.count} báo cáo!`);
+      btn.disabled = false; 
+      btn.innerHTML = originalText;
+    }).catch(function(err){
+      toast(err.message ? err.message : String(err), true);
+      btn.disabled = false; 
+      btn.innerHTML = originalText;
+    });
+  });
+
+  // ============================================
+  // MODULE THỐNG KÊ CHI TIẾT
+  // ============================================
+  onChange("sumPeriodType", renderSummaryPeriodSelect);
+  onChange("sumStatusFilter", function() {
+    if(currentSummaryDetails.length > 0) renderSummaryTable(currentSummaryDetails);
+  });
+
+  function renderSummaryPeriodSelect(){
+    var t = $("sumPeriodType") ? $("sumPeriodType").value : "Tháng";
+    var box = $("sumPeriodValueBox");
+    if(!box) return;
+
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1, q = Math.ceil(m/3);
+
+    if(t === "Tháng"){
+      var mOpts = "";
+      for(var i=1; i<=12; i++) {
+         var sm = String(i).padStart(2,'0');
+         mOpts += '<option value="Tháng ' + sm + '" ' + (i===m?'selected':'') + '>Tháng ' + sm + '</option>';
+      }
+      box.innerHTML = '<label class="label">2. Chọn Tháng & Năm</label>' +
+        '<div style="display:flex;gap:6px">' +
+          '<select id="sumMonth" class="field">' + mOpts + '</select>' +
+          '<select id="sumYear" class="field">' + buildYearOptions(y) + '</select>' +
+        '</div>';
+    } else if(t === "Quý"){
+      box.innerHTML = '<label class="label">2. Chọn Quý & Năm</label>' +
+        '<div style="display:flex;gap:6px">' +
+          '<select id="sumQuarter" class="field">' +
+            '<option value="Quý I" ' + (q===1?'selected':'') + '>Quý I</option>' +
+            '<option value="Quý II" ' + (q===2?'selected':'') + '>Quý II</option>' +
+            '<option value="Quý III" ' + (q===3?'selected':'') + '>Quý III</option>' +
+            '<option value="Quý IV" ' + (q===4?'selected':'') + '>Quý IV</option>' +
+          '</select>' +
+          '<select id="sumYear" class="field">' + buildYearOptions(y) + '</select>' +
+        '</div>';
+    } else if(t === "Năm"){
+      box.innerHTML = '<label class="label">2. Chọn Năm</label>' +
+        '<select id="sumYear" class="field">' + buildYearOptions(y) + '</select>';
+    } else if(t === "Đột xuất"){
+      var dxSet = [];
+      for(var i=0; i<globalAdhocPeriods.length; i++) {
+         if(dxSet.indexOf(globalAdhocPeriods[i].name) === -1) dxSet.push(globalAdhocPeriods[i].name);
+      }
+      for(var i=0; i<globalReports.length; i++) {
+         if(globalReports[i].periodType === "Đột xuất") {
+            if(dxSet.indexOf(globalReports[i].periodValue) === -1) dxSet.push(globalReports[i].periodValue);
+         }
+      }
+      
+      var adminBtn = currentUser ? '<button type="button" class="btn-sync" style="padding:8px 12px; margin-left:8px; background:#ea580c; border:none; border-radius:8px;" onclick="document.querySelector(\'.navbtn[data-page=\\\'users\\\']\').click();">+ Tạo đợt</button>' : '';
+      if(dxSet.length > 0){
+        var opts = "";
+        for(var i=0; i<dxSet.length; i++) opts += '<option value="' + dxSet[i] + '">' + dxSet[i] + '</option>';
+        box.innerHTML = '<label class="label">2. Tên đợt báo cáo</label>' +
+          '<div style="display:flex; align-items:center;">' +
+            '<select id="sumDotXuat" class="field">' + opts + '</select>' + adminBtn +
+          '</div>';
+      } else {
+        box.innerHTML = '<label class="label">2. Tên đợt báo cáo</label>' +
+          '<div style="display:flex; align-items:center;">' +
+             '<input id="sumDotXuat" class="field" placeholder="Chưa có đợt đột xuất nào" value="Đột xuất">' + adminBtn +
+          '</div>';
+      }
+    }
+  }
+
+  function getSelectedSummaryPeriodStr(){
+    var t = $("sumPeriodType") ? $("sumPeriodType").value : "Tháng";
+    if(t === "Tháng") return ($("sumMonth") ? $("sumMonth").value : "") + "/" + ($("sumYear") ? $("sumYear").value : "");
+    if(t === "Quý") return ($("sumQuarter") ? $("sumQuarter").value : "") + "/" + ($("sumYear") ? $("sumYear").value : "");
+    if(t === "Năm") return $("sumYear") ? $("sumYear").value : "";
+    if(t === "Đột xuất") return $("sumDotXuat") ? $("sumDotXuat").value : "Đột xuất";
+    return "ALL";
+  }
+
+  onClick("btnRunAggregate", runAggregateReport);
+
+  function runAggregateReport(){
+    var t = $("sumPeriodType") ? $("sumPeriodType").value : "Tháng";
+    var v = getSelectedSummaryPeriodStr();
+    var btn = $("btnRunAggregate");
+    if(btn) { btn.disabled = true; btn.textContent = "⏳ Đang cập nhật..."; }
+    
+    server("getAggregateReport", t, v).then(function(res){
+      if(!res.success) throw new Error(res.message);
+      
+      var s = res.summary;
+      if($("sumCurPeriod")) $("sumCurPeriod").textContent = s.filterValue;
+      if($("sumSubmitted")) $("sumSubmitted").textContent = s.submittedCount + " / " + s.total;
+      if($("sumPending")) $("sumPending").textContent = s.pendingCount;
+      if($("sumRate")) $("sumRate").textContent = s.rate + "%";
+
+      var btnFolder = $("btnSumOpenDrive");
+      if(btnFolder){
+        if (s.folderUrl) {
+          btnFolder.href = s.folderUrl;
+          btnFolder.style.display = "inline-flex";
+        } else {
+          btnFolder.style.display = "none";
+        }
+      }
+
+      var btnZip = $("btnSumDownloadZip");
+      if(btnZip){
+        if (s.submittedCount > 0) {
+          btnZip.style.display = "inline-flex";
+        } else {
+          btnZip.style.display = "none";
+        }
+      }
+
+      currentSummaryDetails = res.details ? res.details : [];
+      renderSummaryTable(currentSummaryDetails);
+      toast("Đã cập nhật số liệu tổng hợp cho: " + s.filterValue);
+      if(btn) { btn.disabled = false; btn.textContent = "🔄 Cập nhật số liệu"; }
+    }).catch(function(err){
+      toast(err.message ? err.message : String(err), true);
+      if(btn) { btn.disabled = false; btn.textContent = "🔄 Cập nhật số liệu"; }
+    });
+  }
+
+  function renderSummaryTable(details){
+    var tbody = $("summaryTableBody");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+
+    var isAdmin = currentUser !== null;
+    var thAction = $("thAction");
+    if(thAction) thAction.style.display = isAdmin ? "table-cell" : "none";
+
+    if(!details || !details.length){
+      tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 8 : 7) + '" style="text-align:center">Vui lòng bấm nút cập nhật số liệu.</td></tr>';
+      return;
+    }
+
+    var statusFilter = $("sumStatusFilter") ? $("sumStatusFilter").value : "ALL";
+    var filteredDetails = [];
+    for(var i=0; i<details.length; i++) {
+       if (statusFilter === "ALL") filteredDetails.push(details[i]);
+       else if (statusFilter === "SUBMITTED" && details[i].isSubmitted) filteredDetails.push(details[i]);
+       else if (statusFilter === "PENDING" && !details[i].isSubmitted) filteredDetails.push(details[i]);
+    }
+
+    if(!filteredDetails.length){
+      tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 8 : 7) + '" style="text-align:center">Không có đơn vị nào phù hợp.</td></tr>';
+      return;
+    }
+
+    for(var i=0; i<filteredDetails.length; i++) {
+      var d = filteredDetails[i];
+      var tr = document.createElement("tr");
+      var statusBadge = d.isSubmitted
+        ? '<span style="color:#07855b;font-weight:800">● Đã nộp</span>'
+        : '<span style="color:#dc2626;font-weight:800">○ Chưa nộp</span>';
+      
+      var links = [];
+      if(d.fileUrl) links.push('<a href="' + d.fileUrl + '" target="_blank" style="color:#b81515;font-weight:700;white-space:nowrap;">📄 File đính kèm</a>');
+      if(d.textContent) links.push('<a href="javascript:void(0)" onclick="showText(\'' + d.id + '\')" style="color:#0b9b68;font-weight:700;white-space:nowrap;">📝 Xem nội dung</a>');
+      var fileLink = links.join(" <br/> ") || '-';
+
+      var actionCol = '';
+      if (isAdmin) {
+        if (d.isSubmitted) {
+          actionCol = '<td style="text-align:center"><button type="button" class="btn-sm-del" onclick="deleteItem(\'' + d.id + '\', \'' + d.unitName + '\', \'' + d.periodValue + '\')">Xóa (Mở khóa)</button></td>';
+        } else {
+          actionCol = '<td style="text-align:center;color:#94a3b8">-</td>';
+        }
+      }
+
+      var rowHtml = '<td>' + (i+1) + '</td>' +
+          '<td><b>' + d.unitName + '</b></td>' +
+          '<td>' + d.unitType + '</td>' +
+          '<td>' + d.periodValue + '</td>' +
+          '<td>' + d.timestamp + '</td>' +
+          '<td>' + fileLink + '</td>' +
+          '<td>' + statusBadge + '</td>';
+
+      if(isAdmin) {
+        rowHtml += actionCol;
+      }
+      tr.innerHTML = rowHtml;
+      tbody.appendChild(tr);
+    }
+  }
+
+  onClick("btnSumDownloadZip", function() {
+    var t = $("sumPeriodType") ? $("sumPeriodType").value : "Tháng";
+    var v = getSelectedSummaryPeriodStr();
+    
+    if(!currentSummaryDetails.length) {
+      return toast("Vui lòng cập nhật số liệu trước khi tải!", true);
+    }
+    
+    var btn = $("btnSumDownloadZip");
+    if(!btn) return;
+    var originalText = btn.innerHTML;
+    btn.disabled = true; 
+    btn.innerHTML = "⏳ Đang nén file... Vui lòng đợi";
+    toast("Hệ thống đang thu thập và nén toàn bộ tệp tin. Quá trình này có thể mất vài chục giây.");
+
+    server("zipAndDownloadReports", t, v).then(function(res){
+      if(!res.success) throw new Error(res.message);
+      
+      var a = document.createElement('a');
+      a.href = res.downloadUrl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      toast(`Đã tải thành công file ZIP chứa ${res.count} báo cáo!`);
+      btn.disabled = false; 
+      btn.innerHTML = originalText;
+    }).catch(function(err){
+      toast(err.message ? err.message : String(err), true);
+      btn.disabled = false; 
+      btn.innerHTML = originalText;
+    });
+  });
+
+  // TÍNH NĂNG TỰ ĐỘNG PHÂN LOẠI: XUẤT BẢNG KẾT QUẢ HOẶC CHẠY AI PROMPT
+  onClick("btnOpenAIReportModal", function() {
+    if(!currentSummaryDetails.length){
+      return toast("Vui lòng bấm nút 'Cập nhật số liệu' trước khi thực hiện!", true);
+    }
+    executeAIAnalysis();
+  });
+
+  onClick("btnRunGeminiRedirect", function() {
+      if(currentRawCorpus) {
+          navigator.clipboard.writeText(currentRawCorpus).then(function() {
+             toast("Đã Copy Dữ liệu! Đang mở trang Gemini...");
+             setTimeout(function() {
+                 window.open("https://gemini.google.com/app", "_blank");
+             }, 800);
+          });
+      } else {
+          toast("Dữ liệu trống, vui lòng thử lại!", true);
+      }
+  });
+
+  function executeAIAnalysis(){
+    var t = $("sumPeriodType") ? $("sumPeriodType").value : "Tháng";
+    var v = getSelectedSummaryPeriodStr();
+    
+    if($("aiModalTitle")) $("aiModalTitle").textContent = "Báo Cáo Phân Tích Chuyên Sâu - " + v;
+    if($("aiSummaryStats")) $("aiSummaryStats").innerHTML = "Đang tổng hợp thông tin...";
+    if($("aiModal")) $("aiModal").classList.add("show");
+
+    server("prepareDataForClientGemini", t, v).then(function(res){
+      if(!res.success) throw new Error(res.message);
+
+      if($("aiSummaryStats")) {
+        $("aiSummaryStats").innerHTML = 
+          "• <b>Kỳ báo cáo:</b> " + res.periodValue + "<br>" +
+          "• <b>Tổng số đơn vị:</b> " + res.total + " (Đã nộp: <b style='color:#07855b'>" + res.submittedCount + "</b> | Chưa nộp: <b style='color:#dc2626'>" + res.pendingCount + "</b>)<br>" +
+          "• <b>Tỷ lệ hoàn thành:</b> <b>" + res.rate + "%</b>";
+      }
+
+      if (res.dataType === 'sheet') {
+         // KẾT QUẢ DẠNG BẢNG
+         $("aiReportOutputArea").style.display = "none";
+         $("aiGuideText").innerHTML = "📊 Hệ thống phát hiện đây là <b>Biểu mẫu nhập số liệu</b>. Báo cáo đã tự động tổng hợp thành file Google Sheet.";
+         $("btnRunGeminiRedirect").style.display = "none";
+         $("btnCopyAIPrompt").style.display = "none";
+         
+         var btnDownload = $("btnDownloadFormCsv");
+         if(!btnDownload) {
+            btnDownload = document.createElement("button");
+            btnDownload.id = "btnDownloadFormCsv";
+            btnDownload.className = "btn-sync";
+            $("aiModalTitle").parentElement.nextElementSibling.appendChild(btnDownload);
+         }
+         btnDownload.innerHTML = "📥 Mở File Bảng Số Liệu (Google Sheet)";
+         btnDownload.style.display = "inline-flex";
+         btnDownload.onclick = function() {
+             window.open(res.sheetUrl, "_blank");
+         };
+
+         var tableContainer = $("dynamicTableResult");
+         if (tableContainer) tableContainer.style.display = "none";
+
+         toast("Đã tự động xuất bảng số liệu thành công!");
+      } else {
+         // KẾT QUẢ DẠNG PROMPT
+         currentRawCorpus = res.promptText ? res.promptText : "";
+         $("aiReportOutputArea").style.display = "block";
+         $("aiReportOutputArea").value = res.promptText;
+         $("aiGuideText").innerHTML = "🤖 HƯỚNG DẪN TỔNG HỢP AI MIỄN PHÍ 100% (KHÔNG CẦN API KEY)<br><p style='font-size:13px; color:#334155; line-height:1.6; font-weight:normal;'>Hệ thống đã tự động gom toàn bộ số liệu và nội dung báo cáo của các đơn vị. Bạn hãy làm theo 2 bước cực kỳ đơn giản sau:</p><ol style='font-size:13px; color:#334155; line-height:1.6; margin-top:5px; font-weight:normal;'><li>Bấm nút màu tím <b>\"TẠO DỮ LIỆU & MỞ TRANG GEMINI\"</b> ở trên. (Hệ thống sẽ tự động Copy nội dung và mở trang Web AI Gemini chính thức của Google).</li><li>Tại trang Gemini hiện ra, bạn chỉ cần bấm chuột phải chọn <b>Paste (Dán)</b> hoặc bấm <b>Ctrl + V</b> vào ô Chat và ấn Enter. Google Gemini sẽ tự tổng hợp số liệu cho bạn ngay lập tức!</li></ol>";
+         $("btnRunGeminiRedirect").style.display = "inline-flex";
+         $("btnCopyAIPrompt").style.display = "inline-flex";
+         
+         if($("btnDownloadFormCsv")) $("btnDownloadFormCsv").style.display = "none";
+         if($("dynamicTableResult")) $("dynamicTableResult").style.display = "none";
+         
+         toast("Đã đóng gói dữ liệu văn bản thành công!");
+      }
+      
+    }).catch(function(err){
+      if($("aiReportOutputArea")) $("aiReportOutputArea").value = "❌ Lỗi: " + (err.message ? err.message : String(err));
+      toast(err.message ? err.message : String(err), true);
+    });
+  }
+
+  onClick("closeAiModal", function() { if($("aiModal")) $("aiModal").classList.remove("show"); });
+
+  onClick("btnCopyAIPrompt", function() {
+    if(!$("aiReportOutputArea")) return;
+    var content = $("aiReportOutputArea").value;
+    navigator.clipboard.writeText(content).then(function() {
+      toast("Đã sao chép toàn bộ dữ liệu vào bộ nhớ tạm!");
+    });
+  });
+
+  function loadAccounts(){
+    if(!currentUser || currentUser.role !== "SUPER_ADMIN") return;
+    server("listAccounts", currentUser.role).then(function(res){
+      if(!res.success) return;
+      var tbody = $("userTableBody"); 
+      if(!tbody) return;
+      tbody.innerHTML = "";
+      for(var i=0; i<res.accounts.length; i++) {
+        var a = res.accounts[i];
+        var tr = document.createElement("tr");
+        var isMasterAdmin = (a.username === 'admin');
+        
+        var actionButtons = '';
+        if(isMasterAdmin){
+          actionButtons = '<span style="color:#94a3b8;font-weight:700">Super Admin Gốc</span>';
+        } else {
+          actionButtons = '<div class="action-btn-group">' +
+              '<button type="button" class="btn-sm-pwd" onclick="openResetUserModal(\'' + a.username + '\')">🔑 Đổi MK</button>' +
+              '<button type="button" class="btn-sm-toggle" onclick="toggleUserStatus(' + a.row + ', \'' + (a.status==='ACTIVE'?'INACTIVE':'ACTIVE') + '\')">' + (a.status==='ACTIVE'?'Khóa':'Mở') + '</button>' +
+              '<button type="button" class="btn-sm-del" onclick="deleteUserBySuperAdmin(' + a.row + ', \'' + a.username + '\')">🗑 Xóa</button>' +
+            '</div>';
+        }
+
+        tr.innerHTML = '<td><b>' + a.username + '</b></td>' +
+          '<td>' + a.fullName + '</td>' +
+          '<td><span style="background:#f1f5f9;padding:3px 8px;border-radius:6px;font-weight:700">' + a.role + '</span></td>' +
+          '<td><span style="color:' + (a.status==='ACTIVE'?'#07855b':'#e02929') + ';font-weight:700">● ' + a.status + '</span></td>' +
+          '<td>' + a.createdAt + '</td>' +
+          '<td>' + actionButtons + '</td>';
+        tbody.appendChild(tr);
+      }
+    }).catch(function(e){ console.error(e); });
+  }
+
+  onSubmit("createAccountForm", function(e) {
+    e.preventDefault();
+    server("createAccount", currentUser.role, {
+      username: $("newUsername").value,
+      password: $("newPassword").value,
+      fullName: $("newFullName").value,
+      role: $("newRole").value
+    }).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success){
+        if($("createAccountForm")) $("createAccountForm").reset();
+        loadAccounts();
+      }
+    }).catch(function(err){ toast(err.message, true); });
+  });
+
+  window.toggleUserStatus = function(row, newStatus){
+    server("updateAccountStatus", currentUser.role, row, newStatus, null).then(function(res){
+      toast(res.message, !res.success);
+      if(res.success) loadAccounts();
+    }).catch(function(err){ toast(err.message, true); });
+  };
+
+  function initApp() {
+    renderUnitList(""); 
+    if($("unitCountLabel")) $("unitCountLabel").textContent = "Sẵn sàng (Đã nạp 106 đơn vị).";
+
+    // THÊM ĐOẠN MÃ NÀY ĐỂ KÍCH HOẠT CHUYỂN TAB KỲ BÁO CÁO
+    var periodBtns = document.querySelectorAll(".period");
+    for(var i=0; i<periodBtns.length; i++) {
+      periodBtns[i].addEventListener("click", function(){
+         periodType = this.dataset.type;
+         renderPeriod();
+      });
+    }
+    // KẾT THÚC ĐOẠN MÃ THÊM MỚI
+
+    try { loadAdhocPeriods(); } catch(e){}
+    try { loadHeaderStats(); } catch(e){}
+    try { loadUnits(); } catch(e){}
+  }
+  
+  initApp();
+
+})();
+</script>
+</body>
+</html>
